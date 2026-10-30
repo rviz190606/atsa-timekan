@@ -1,15 +1,12 @@
-# Python
-__pycache__/
-*.py[cod]
-
-# Virtual environment
-.venv/
-venv/
+# R
+.Rhistory
+.RData
+.Rproj.user/
 
 # Data and model checkpoints
 *.csv
 *.pt
-*.pth
+*.rds
 
 # Editor / OS
 .vscode/

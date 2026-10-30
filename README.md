@@ -1,6 +1,6 @@
 # TimeKAN
 
-A minimal PyTorch implementation of **TimeKAN: KAN-based Frequency Decomposition Learning Architecture for Long-term Time Series Forecasting** (Huang et al., ICLR 2025, [arXiv:2502.06910](https://arxiv.org/abs/2502.06910)).
+A minimal R implementation (using the [`torch`](https://torch.mlverse.org/) package) of **TimeKAN: KAN-based Frequency Decomposition Learning Architecture for Long-term Time Series Forecasting** (Huang et al., ICLR 2025, [arXiv:2502.06910](https://arxiv.org/abs/2502.06910)).
 
 ## How it works
 
@@ -15,27 +15,20 @@ Steps 2–4 repeat `--layers` times, then a linear head produces the forecast. E
 
 ## Setup
 
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install torch numpy pandas
-```
-
-Without a GPU, the CPU-only PyTorch build is a much smaller download:
-
-```bash
-pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install numpy pandas
+```r
+install.packages("torch")
+torch::install_torch()   # downloads libtorch on first use (also prompted automatically)
 ```
 
 ## Usage
 
 ```bash
-python timekan.py                    # train on a synthetic multi-frequency series
-python timekan.py --csv ETTh1.csv    # train on a CSV: first column is the date, the rest are variables
-python timekan.py --help             # list all options
+Rscript timekan.R                       # train on a synthetic multi-frequency series
+Rscript timekan.R --csv ETTh1.csv       # train on a CSV: first column is the date, the rest are variables
+Rscript timekan.R --epochs 5 --levels 4 # override any option below
 ```
+
+You can also `source("timekan.R")` in an R session to use the `timekan()` model without running training.
 
 The data is split 7:1:2 (train/val/test) in time order. The script reports test MSE and MAE for the checkpoint with the best validation MSE.
 
