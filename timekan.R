@@ -14,7 +14,7 @@
 # Usage:
 #   Rscript timekan.R                         # synthetic multi-frequency series
 #   Rscript timekan.R --csv ETTh1.csv         # CSV: first column = date, rest = variates
-#   Rscript timekan.R --epochs 5 --levels 4   # any option below can be overridden
+#   Rscript timekan.R --epochs 5 --levels 4   # any option in default_options can be overridden
 #
 # Tensor shapes in comments use: B = batch, T = input length, F = forecast length,
 # N = number of variates, D = embedding dim, L = sequence length at a given level.
@@ -89,10 +89,12 @@ mkan <- nn_module(
 # Input/output: a list of k tensors; xs[[1]] is the finest (longest) level.
 timekan_layer <- nn_module(
   "TimeKANLayer",
-  initialize = function(dim, num_levels, base_order) {
+  initialize = function(dim, num_levels, base_order, fixed_order = 0) {
     k <- num_levels
     # Level i gets order b + k - i: highest frequency band -> highest polynomial order.
-    self$mkans <- nn_module_list(lapply(1:k, function(i) mkan(dim, base_order + k - i)))
+    # fixed_order > 0 instead gives every level the same order (ablation, paper Table 3).
+    order_of <- function(i) if (fixed_order > 0) fixed_order else base_order + k - i
+    self$mkans <- nn_module_list(lapply(1:k, function(i) mkan(dim, order_of(i))))
   },
   forward = function(xs) {
     k <- length(xs)
@@ -128,7 +130,7 @@ timekan_layer <- nn_module(
 timekan <- nn_module(
   "TimeKAN",
   initialize = function(seq_len, pred_len, d_model = 16, num_levels = 3, window = 2,
-                        num_layers = 2, base_order = 1) {
+                        num_layers = 2, base_order = 1, fixed_order = 0) {
     stopifnot("seq_len must be divisible by window^(levels - 1)" =
                 seq_len %% (window^(num_levels - 1)) == 0)
     self$num_levels <- num_levels
@@ -137,7 +139,7 @@ timekan <- nn_module(
     # Embed each scalar time step into D dims, Eq. (2) (one Linear per level).
     self$embeds <- nn_module_list(lapply(1:num_levels, function(i) nn_linear(1, d_model)))
     self$layers <- nn_module_list(lapply(1:num_layers, function(i)
-      timekan_layer(d_model, num_levels, base_order)))
+      timekan_layer(d_model, num_levels, base_order, fixed_order)))
     # Forecast head, Eq. (12): project D -> 1, then time T -> F.
     self$proj_dim <- nn_linear(d_model, 1)
     self$proj_time <- nn_linear(seq_len, pred_len)
@@ -182,8 +184,8 @@ timekan <- nn_module(
 # ---------------------------------------------------------------------------
 
 # Return a [time, variates] numeric matrix (synthetic if no CSV given).
-load_series <- function(csv_path = NULL) {
-  if (!is.null(csv_path)) {
+load_series <- function(csv_path = "") {
+  if (nzchar(csv_path)) {
     df <- read.csv(csv_path)
     return(as.matrix(df[, -1]))                 # drop the date column
   }
@@ -193,6 +195,47 @@ load_series <- function(csv_path = NULL) {
   sapply(c(0, 1, 2), function(p)
     sin(2 * pi * t / 200 + p) + 0.5 * sin(2 * pi * t / 24 + 2 * p) +
       0.2 * sin(2 * pi * t / 6) + 0.1 * rnorm(length(t)))
+}
+
+# Row ranges [start, end] of the train/val/test parts.
+#   "etth"/"ettm": the standard ETT benchmark split (Zhou et al. 2021, used by the paper):
+#                  12 months train, 4 months val, 4 months test (months of 30 days).
+#                  The last ~6 months of the file are not used.
+#   "712":         70% / 10% / 20% of the whole series.
+#   "auto":        "etth"/"ettm" if the file name starts with ETTh/ETTm, else "712".
+split_borders <- function(n_rows, split, csv_path) {
+  if (split == "auto") {
+    name <- basename(csv_path)
+    split <- if (grepl("^ETTh", name)) "etth" else if (grepl("^ETTm", name)) "ettm" else "712"
+  }
+  if (split %in% c("etth", "ettm")) {
+    month <- 30 * 24 * (if (split == "ettm") 4 else 1)   # rows per month (hourly or 15-min)
+    ends <- c(12, 16, 20) * month
+  } else {
+    ends <- c(floor(0.7 * n_rows), floor(0.7 * n_rows) + floor(0.1 * n_rows), n_rows)
+  }
+  list(name = split, train = c(1, ends[1]), val = c(ends[1] + 1, ends[2]),
+       test = c(ends[2] + 1, ends[3]))
+}
+
+# Load, split and z-score the data (using training statistics only).
+# Returns the three parts plus the scaling stats (needed to plot in original units).
+prepare_data <- function(opt) {
+  data <- load_series(opt$csv)
+  b <- split_borders(nrow(data), opt$split, opt$csv)
+  train_rows <- b$train[1]:b$train[2]
+  mu <- colMeans(data[train_rows, , drop = FALSE])
+  sdev <- apply(data[train_rows, , drop = FALSE], 2, sd) + 1e-8
+  data <- scale(data, center = mu, scale = sdev)
+
+  # Val/test parts start seq_len rows early, so their first forecast begins exactly
+  # at the split boundary (the look-back window may reach into the previous part).
+  part <- function(r, back) data[(r[1] - back):r[2], , drop = FALSE]
+  list(split = b$name,
+       train = part(b$train, 0),
+       val   = part(b$val, opt$seq_len),
+       test  = part(b$test, opt$seq_len),
+       mu = mu, sdev = sdev, names = colnames(data))
 }
 
 # Sliding windows: (past seq_len steps, next pred_len steps).
@@ -240,9 +283,31 @@ evaluate <- function(model, loader, device) {
   c(mse = mse / n, mae = mae / n)
 }
 
+# All options with their defaults. Any of them can be overridden as "--name value".
+default_options <- list(
+  csv = "",              # CSV file (first column = timestamp); empty = synthetic data
+  split = "auto",        # "auto", "etth", "ettm" or "712" (see split_borders)
+  seq_len = 96,          # look-back window T
+  pred_len = 96,         # forecast horizon F
+  d_model = 16,          # embedding dimension D
+  levels = 3,            # number of frequency bands k
+  window = 2,            # moving-average window d
+  layers = 2,            # number of stacked blocks L
+  base_order = 1,        # lowest Chebyshev order b
+  fixed_order = 0,       # if > 0, use this KAN order at every level (ablation)
+  epochs = 10,
+  patience = 3,          # stop after this many epochs without a better val MSE
+  batch_size = 32,
+  lr = 1e-3,
+  seed = 0,
+  device = "auto",       # "cuda", "cpu", or "auto" (GPU if available)
+  out = "",              # if set, append a row of results to this CSV
+  save = "",             # if set, save the trained model to this file
+  tag = ""               # free-text label stored in the results row (e.g. "ablation")
+)
+
 # Minimal "--flag value" parser; returns `defaults` with any overrides applied.
-parse_args <- function(defaults) {
-  args <- commandArgs(trailingOnly = TRUE)
+parse_args <- function(defaults, args = commandArgs(trailingOnly = TRUE)) {
   for (i in seq_len(length(args) %/% 2) * 2 - 1) {
     key <- sub("^--", "", args[i])
     if (!key %in% names(defaults)) stop("Unknown option: ", args[i])
@@ -252,56 +317,34 @@ parse_args <- function(defaults) {
   defaults
 }
 
-main <- function() {
-  opt <- parse_args(list(
-    csv = "",              # CSV file (first column = timestamp); empty = synthetic data
-    seq_len = 96,          # look-back window T
-    pred_len = 96,         # forecast horizon F
-    d_model = 16,          # embedding dimension D
-    levels = 3,            # number of frequency bands k
-    window = 2,            # moving-average window d
-    layers = 2,            # number of stacked blocks L
-    base_order = 1,        # lowest Chebyshev order b
-    epochs = 10,
-    batch_size = 32,
-    lr = 1e-3,
-    device = "auto"        # "cuda", "cpu", or "auto" (GPU if available)
-  ))
-  torch_manual_seed(0)
+# Train one model with options `opt`, report test MSE/MAE, optionally save results/model.
+run_experiment <- function(opt) {
+  set.seed(opt$seed)
+  torch_manual_seed(opt$seed)
   device <- if (opt$device == "auto") {
     if (cuda_is_available()) "cuda" else "cpu"
   } else opt$device
-  cat("device:", device, "\n")
 
-  # Chronological 7:1:2 split, z-scored with training statistics.
-  data <- load_series(if (nzchar(opt$csv)) opt$csv else NULL)
-  n_train <- floor(0.7 * nrow(data))
-  n_val <- floor(0.1 * nrow(data))
-  mu <- colMeans(data[1:n_train, , drop = FALSE])
-  sdev <- apply(data[1:n_train, , drop = FALSE], 2, sd) + 1e-8
-  data <- scale(data, center = mu, scale = sdev)
-
-  # Val/test windows start seq_len steps early so their first forecast begins at the split.
-  splits <- list(
-    train = data[1:n_train, , drop = FALSE],
-    val   = data[(n_train - opt$seq_len + 1):(n_train + n_val), , drop = FALSE],
-    test  = data[(n_train + n_val - opt$seq_len + 1):nrow(data), , drop = FALSE]
-  )
-  loaders <- lapply(names(splits), function(k)
-    dataloader(window_dataset(splits[[k]], opt$seq_len, opt$pred_len),
+  d <- prepare_data(opt)
+  cat(sprintf("data: %s | split: %s | %d variates | seq_len %d -> pred_len %d | device: %s\n",
+              if (nzchar(opt$csv)) basename(opt$csv) else "synthetic", d$split,
+              ncol(d$train), opt$seq_len, opt$pred_len, device))
+  loaders <- lapply(c(train = "train", val = "val", test = "test"), function(k)
+    dataloader(window_dataset(d[[k]], opt$seq_len, opt$pred_len),
                batch_size = opt$batch_size, shuffle = (k == "train")))
-  names(loaders) <- names(splits)
 
   model <- timekan(opt$seq_len, opt$pred_len, opt$d_model, opt$levels,
-                   opt$window, opt$layers, opt$base_order)
+                   opt$window, opt$layers, opt$base_order, opt$fixed_order)
   model$to(device = device)
   n_params <- sum(sapply(model$parameters, function(p) p$numel()))
   cat(sprintf("TimeKAN parameters: %s\n", format(n_params, big.mark = ",")))
   optimizer <- optim_adam(model$parameters, lr = opt$lr)
 
-  # Keep the weights with the best validation MSE (simple early-stopping checkpoint).
+  # Keep the weights with the best validation MSE; stop early if it stops improving.
   best_val <- Inf
   best_state <- NULL
+  bad_epochs <- 0
+  t0 <- Sys.time()
   for (epoch in 1:opt$epochs) {
     start <- Sys.time()
     model$train()
@@ -319,13 +362,31 @@ main <- function() {
     if (val[["mse"]] < best_val) {
       best_val <- val[["mse"]]
       best_state <- lapply(model$state_dict(), function(t) t$clone())
+      bad_epochs <- 0
+    } else {
+      bad_epochs <- bad_epochs + 1
+      if (bad_epochs >= opt$patience) { cat("early stopping\n"); break }
     }
   }
 
   model$load_state_dict(best_state)
   test <- evaluate(model, loaders$test, device)
+  minutes <- as.numeric(difftime(Sys.time(), t0, units = "mins"))
   cat(sprintf("test MSE %.4f | test MAE %.4f\n", test[["mse"]], test[["mae"]]))
+
+  if (nzchar(opt$out)) {
+    row <- data.frame(
+      dataset = if (nzchar(opt$csv)) sub("\\.csv$", "", basename(opt$csv)) else "synthetic",
+      tag = opt$tag, seq_len = opt$seq_len, pred_len = opt$pred_len, levels = opt$levels,
+      base_order = opt$base_order, fixed_order = opt$fixed_order, d_model = opt$d_model, seed = opt$seed,
+      params = n_params, epochs_run = epoch, minutes = round(minutes, 2),
+      val_mse = best_val, test_mse = test[["mse"]], test_mae = test[["mae"]])
+    write.table(row, opt$out, sep = ",", row.names = FALSE,
+                col.names = !file.exists(opt$out), append = file.exists(opt$out))
+  }
+  if (nzchar(opt$save)) torch_save(model, opt$save)
+  invisible(list(model = model, test = test, data = d, device = device))
 }
 
-# Run main() only when executed as a script (not when source()'d).
-if (sys.nframe() == 0) main()
+# Run only when executed as a script (not when source()'d, e.g. by plots.R).
+if (sys.nframe() == 0) run_experiment(parse_args(default_options))

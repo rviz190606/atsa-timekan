@@ -12,3 +12,6 @@
 .vscode/
 .idea/
 .DS_Store
+
+# Experiment progress log
+run.log
