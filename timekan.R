@@ -196,20 +196,26 @@ load_series <- function(csv_path = NULL) {
 }
 
 # Sliding windows: (past seq_len steps, next pred_len steps).
+# Window i covers rows i .. i+seq_len-1 (input) and the next pred_len rows (target).
 window_dataset <- dataset(
   "WindowDataset",
   initialize = function(data, seq_len, pred_len) {
-    self$data <- torch_tensor(data, dtype = torch_float())
+    self$data <- unname(as.matrix(data))        # plain [time, variates] R matrix
     self$seq_len <- seq_len
     self$pred_len <- pred_len
   },
   .length = function() {
-    self$data$size(1) - self$seq_len - self$pred_len + 1
+    nrow(self$data) - self$seq_len - self$pred_len + 1
   },
-  .getitem = function(i) {                      # i is 1-based
-    s <- i + self$seq_len                       # first forecast step
-    list(x = self$data[i:(s - 1), ],
-         y = self$data[s:(s + self$pred_len - 1), ])
+  # Build a whole batch at once (much faster than one window at a time).
+  # `index` holds the 1-based start rows of the windows in this batch.
+  .getbatch = function(index) {
+    gather <- function(offset, len) {
+      rows <- as.vector(outer(0:(len - 1), index + offset, "+"))   # window by window
+      torch_tensor(self$data[rows, , drop = FALSE], dtype = torch_float())$
+        reshape(c(length(index), len, ncol(self$data)))             # [batch, len, N]
+    }
+    list(x = gather(0, self$seq_len), y = gather(self$seq_len, self$pred_len))
   }
 )
 
@@ -219,15 +225,16 @@ window_dataset <- dataset(
 # ---------------------------------------------------------------------------
 
 # Mean squared and absolute error over every forecast value in the loader.
-evaluate <- function(model, loader) {
+evaluate <- function(model, loader, device) {
   model$eval()
   mse <- 0; mae <- 0; n <- 0
   with_no_grad({
     coro::loop(for (b in loader) {
-      p <- model(b$x)
-      mse <- mse + nnf_mse_loss(p, b$y, reduction = "sum")$item()
-      mae <- mae + nnf_l1_loss(p, b$y, reduction = "sum")$item()
-      n <- n + b$y$numel()
+      x <- b$x$to(device = device); y <- b$y$to(device = device)
+      p <- model(x)
+      mse <- mse + nnf_mse_loss(p, y, reduction = "sum")$item()
+      mae <- mae + nnf_l1_loss(p, y, reduction = "sum")$item()
+      n <- n + y$numel()
     })
   })
   c(mse = mse / n, mae = mae / n)
@@ -257,9 +264,14 @@ main <- function() {
     base_order = 1,        # lowest Chebyshev order b
     epochs = 10,
     batch_size = 32,
-    lr = 1e-3
+    lr = 1e-3,
+    device = "auto"        # "cuda", "cpu", or "auto" (GPU if available)
   ))
   torch_manual_seed(0)
+  device <- if (opt$device == "auto") {
+    if (cuda_is_available()) "cuda" else "cpu"
+  } else opt$device
+  cat("device:", device, "\n")
 
   # Chronological 7:1:2 split, z-scored with training statistics.
   data <- load_series(if (nzchar(opt$csv)) opt$csv else NULL)
@@ -282,6 +294,7 @@ main <- function() {
 
   model <- timekan(opt$seq_len, opt$pred_len, opt$d_model, opt$levels,
                    opt$window, opt$layers, opt$base_order)
+  model$to(device = device)
   n_params <- sum(sapply(model$parameters, function(p) p$numel()))
   cat(sprintf("TimeKAN parameters: %s\n", format(n_params, big.mark = ",")))
   optimizer <- optim_adam(model$parameters, lr = opt$lr)
@@ -290,15 +303,19 @@ main <- function() {
   best_val <- Inf
   best_state <- NULL
   for (epoch in 1:opt$epochs) {
+    start <- Sys.time()
     model$train()
     coro::loop(for (b in loaders$train) {
       optimizer$zero_grad()
-      loss <- nnf_mse_loss(model(b$x), b$y)    # L2 loss, as in the paper
+      x <- b$x$to(device = device); y <- b$y$to(device = device)
+      loss <- nnf_mse_loss(model(x), y)        # L2 loss, as in the paper
       loss$backward()
       optimizer$step()
     })
-    val <- evaluate(model, loaders$val)
-    cat(sprintf("epoch %2d | train loss %.4f | val MSE %.4f\n", epoch, loss$item(), val[["mse"]]))
+    val <- evaluate(model, loaders$val, device)
+    secs <- as.numeric(difftime(Sys.time(), start, units = "secs"))
+    cat(sprintf("epoch %2d | train loss %.4f | val MSE %.4f | %.1fs\n",
+                epoch, loss$item(), val[["mse"]], secs))
     if (val[["mse"]] < best_val) {
       best_val <- val[["mse"]]
       best_state <- lapply(model$state_dict(), function(t) t$clone())
@@ -306,7 +323,7 @@ main <- function() {
   }
 
   model$load_state_dict(best_state)
-  test <- evaluate(model, loaders$test)
+  test <- evaluate(model, loaders$test, device)
   cat(sprintf("test MSE %.4f | test MAE %.4f\n", test[["mse"]], test[["mae"]]))
 }
 

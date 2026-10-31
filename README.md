@@ -20,6 +20,16 @@ install.packages("torch")
 torch::install_torch()   # downloads libtorch on first use (also prompted automatically)
 ```
 
+For an NVIDIA GPU, install the CUDA build instead (a ~3.6 GB download):
+
+```bash
+CUDA=12.8 Rscript -e 'torch::install_torch(reinstall = TRUE)'
+```
+
+If `/tmp` is small (for example an in-memory tmpfs), the unzip can fail. Point `TMPDIR` at a folder on a larger disk first.
+If loading torch then reports `libcudart.so.12: cannot open shared object file`, create that name as a symlink to the bundled
+`libcudart-*.so.12` file in torch's `lib/` folder.
+
 ## Usage
 
 ```bash
@@ -46,6 +56,7 @@ The data is split 7:1:2 (train/val/test) in time order. The script reports test 
 | `--epochs` | 10 | training epochs |
 | `--batch_size` | 32 | batch size |
 | `--lr` | 1e-3 | Adam learning rate |
+| `--device` | auto | `cuda`, `cpu`, or `auto` (GPU if available) |
 
 `seq_len` must be divisible by `window^(levels − 1)`.
 
