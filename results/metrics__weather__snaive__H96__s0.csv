@@ -1,0 +1,2 @@
+"key","variant","family","pred_len","seq_len","seed","n_channels","n_model_channels","params","epochs_run","best_epoch","train_sec","sec_per_epoch","val_mse","test_mse","test_mae","pca_floor","lambda","d_model"
+"weather","snaive","snaive",96,96,0,21,21,0,0,0,0,0,0.759628095253056,0.312311179757292,0.283533144490813,NA,0,16

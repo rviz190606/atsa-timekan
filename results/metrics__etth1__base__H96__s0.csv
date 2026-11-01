@@ -1,0 +1,2 @@
+"key","variant","family","pred_len","seq_len","seed","n_channels","n_model_channels","params","epochs_run","best_epoch","train_sec","sec_per_epoch","val_mse","test_mse","test_mae","pca_floor","lambda","d_model"
+"etth1","base","timekan",96,96,0,7,7,14417,11,8,293.5764939785,26.6887721798637,0.693697970099171,0.381924842090253,0.403109166446258,NA,0,16

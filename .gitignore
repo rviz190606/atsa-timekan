@@ -3,10 +3,17 @@
 .RData
 .Rproj.user/
 
-# Data and model checkpoints
-*.csv
+# Large datasets and raw data
+data/
 *.pt
+
+# Binary R detail checkpoints
 *.rds
+
+# Keep result CSVs and plots
+!results/
+!results/*.csv
+!results/*.png
 
 # Editor / OS
 .vscode/

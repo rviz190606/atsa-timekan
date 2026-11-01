@@ -1,0 +1,2 @@
+"key","variant","family","pred_len","seq_len","seed","n_channels","n_model_channels","params","epochs_run","best_epoch","train_sec","sec_per_epoch","val_mse","test_mse","test_mae","pca_floor","lambda","d_model"
+"weather","base","timekan",96,96,0,21,21,14417,5,5,987.934000968933,197.586800193787,0.323938441815877,0.194290449810708,0.205538583279716,NA,0,16
