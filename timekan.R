@@ -121,15 +121,39 @@ cheby_kan <- nn_module(
 #   - KAN along channels           (representation learning; Chebyshev in the paper)
 mkan <- nn_module(
   "MKAN",
-  initialize = function(dim, order, kernel_size = 3, basis = "chebyshev") {
+  initialize = function(dim, order, kernel_size = 3, basis = "chebyshev", branch_mix = "none") {
     # groups = dim makes it depthwise: each channel gets its own 1D filter.
     self$dwconv <- nn_conv1d(dim, dim, kernel_size, padding = kernel_size %/% 2, groups = dim)
     self$kan <- cheby_kan(dim, order, basis)
+    self$branch_mix <- branch_mix
+    if (branch_mix == "ab") {
+      self$alpha <- nn_parameter(torch_ones(1))
+      self$beta  <- nn_parameter(torch_ones(1))
+    } else if (branch_mix %in% c("alpha_1minus_alpha", "convex")) {
+      self$mix_weight <- nn_parameter(torch_zeros(1))
+    }
   },
   forward = function(f) {                                   # f: [B, L, D]
     f1 <- self$dwconv(f$transpose(2, 3))$transpose(2, 3)    # Eq. (5); conv wants [B, D, L]
     f2 <- self$kan(f)                                       # Eq. (9)
-    f1 + f2                                                 # Eq. (10)
+    if (self$branch_mix == "ab") {
+      self$alpha * f1 + self$beta * f2
+    } else if (self$branch_mix %in% c("alpha_1minus_alpha", "convex")) {
+      a <- torch_sigmoid(self$mix_weight)
+      a * f1 + (1 - a) * f2
+    } else {
+      f1 + f2                                               # Eq. (10)
+    }
+  },
+  get_weights = function() {
+    if (self$branch_mix == "ab") {
+      c(alpha = self$alpha$item(), beta = self$beta$item())
+    } else if (self$branch_mix %in% c("alpha_1minus_alpha", "convex")) {
+      a <- torch_sigmoid(self$mix_weight)$item()
+      c(alpha = a, beta = 1 - a)
+    } else {
+      c(alpha = 1.0, beta = 1.0)
+    }
   }
 )
 
@@ -152,10 +176,12 @@ band_orders <- function(k, base_order, fixed_order = 0, order_mode = "paper") {
 timekan_layer <- nn_module(
   "TimeKANLayer",
   initialize = function(dim, num_levels, base_order, fixed_order = 0, order_mode = "paper",
-                        basis = "chebyshev", cfd_mode = "paper") {
+                        basis = "chebyshev", cfd_mode = "paper", branch_mix = "none") {
     self$official <- cfd_mode == "official"
+    self$branch_mix <- branch_mix
     self$orders <- band_orders(num_levels, base_order, fixed_order, order_mode)
-    self$mkans <- nn_module_list(lapply(self$orders, function(o) mkan(dim, o, basis = basis)))
+    self$mkans <- nn_module_list(lapply(self$orders, function(o)
+      mkan(dim, o, basis = basis, branch_mix = branch_mix)))
   },
 
   # --- Cascaded Frequency Decomposition, Eq. (4) ---
@@ -198,22 +224,40 @@ timekan <- nn_module(
   "TimeKAN",
   initialize = function(seq_len, pred_len, d_model = 16, num_levels = 3, window = 2,
                         num_layers = 2, base_order = 1, fixed_order = 0,
-                        order_mode = "paper", basis = "chebyshev", cfd_mode = "paper") {
+                        order_mode = "paper", basis = "chebyshev", cfd_mode = "paper",
+                        branch_mix = "none") {
     stopifnot("seq_len must be divisible by window^(levels - 1)" =
                 seq_len %% (window^(num_levels - 1)) == 0)
     stopifnot(cfd_mode %in% c("paper", "exact", "official"))
     self$num_levels <- num_levels
+    self$num_layers <- num_layers
     self$window <- window
     self$cfd_mode <- cfd_mode
+    self$branch_mix <- branch_mix
     # Moving average used to remove high frequencies, Eq. (1).
     self$pool <- nn_avg_pool1d(window, stride = window)
     # Embed each scalar time step into D dims, Eq. (2) (one Linear per level).
     self$embeds <- nn_module_list(lapply(1:num_levels, function(i) nn_linear(1, d_model)))
     self$layers <- nn_module_list(lapply(1:num_layers, function(i)
-      timekan_layer(d_model, num_levels, base_order, fixed_order, order_mode, basis, cfd_mode)))
+      timekan_layer(d_model, num_levels, base_order, fixed_order, order_mode, basis, cfd_mode, branch_mix = branch_mix)))
     # Forecast head, Eq. (12): project D -> 1, then time T -> F.
     self$proj_dim <- nn_linear(d_model, 1)
     self$proj_time <- nn_linear(seq_len, pred_len)
+  },
+
+  get_branch_weights = function() {
+    nl <- length(self$layers)
+    nb <- self$num_levels
+    alpha_mat <- matrix(NA_real_, nl, nb)
+    beta_mat  <- matrix(NA_real_, nl, nb)
+    for (l in seq_len(nl)) {
+      for (b in seq_len(nb)) {
+        w <- self$layers[[l]]$mkans[[b]]$get_weights()
+        alpha_mat[l, b] <- w[["alpha"]]
+        beta_mat[l, b]  <- w[["beta"]]
+      }
+    }
+    list(alpha = alpha_mat, beta = beta_mat, branch_mix = self$branch_mix)
   },
 
   # Normalise and build the embedded multi-level sequences (everything before the layers).
@@ -377,6 +421,7 @@ default_options <- list(
   order_mode = "paper",  # "paper" (high freq -> high order) or "reversed" (see band_orders)
   basis = "chebyshev",   # KAN function family: chebyshev, legendre, fourier, rbf, linear
   cfd_mode = "paper",    # "paper", "exact" (ideal FFT band split) or "official" (authors' 1/4 scale)
+  branch_mix = "none",   # "none" (baseline f1+f2), "ab" (alpha*f1 + beta*f2), or "alpha_1minus_alpha" / "convex"
   epochs = 10,
   patience = 3,          # stop after this many epochs without a better val MSE
   batch_size = 32,
@@ -417,7 +462,7 @@ run_experiment <- function(opt) {
 
   model <- timekan(opt$seq_len, opt$pred_len, opt$d_model, opt$levels,
                    opt$window, opt$layers, opt$base_order, opt$fixed_order,
-                   opt$order_mode, opt$basis, opt$cfd_mode)
+                   opt$order_mode, opt$basis, opt$cfd_mode, opt$branch_mix)
   model$to(device = device)
   n_params <- sum(sapply(model$parameters, function(p) p$numel()))
   cat(sprintf("TimeKAN parameters: %s\n", format(n_params, big.mark = ",")))
@@ -462,7 +507,7 @@ run_experiment <- function(opt) {
       dataset = if (nzchar(opt$csv)) sub("\\.csv$", "", basename(opt$csv)) else "synthetic",
       tag = opt$tag, seq_len = opt$seq_len, pred_len = opt$pred_len, levels = opt$levels,
       base_order = opt$base_order, fixed_order = opt$fixed_order,
-      order_mode = opt$order_mode, basis = opt$basis, d_model = opt$d_model, seed = opt$seed,
+      order_mode = opt$order_mode, basis = opt$basis, branch_mix = opt$branch_mix, d_model = opt$d_model, seed = opt$seed,
       params = n_params, epochs_run = epoch, minutes = round(minutes, 2),
       val_mse = best_val, test_mse = test[["mse"]], test_mae = test[["mae"]])
     write.table(row, opt$out, sep = ",", row.names = FALSE,

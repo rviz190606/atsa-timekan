@@ -93,19 +93,21 @@ parse_args <- function(defaults, args = commandArgs(trailingOnly = TRUE)) {
 
 split_csv <- function(x) { x <- trimws(strsplit(x, ",", fixed = TRUE)[[1]]); x[nzchar(x)] }
 
-ALLOWED_TOKENS <- c("base", "naive", "snaive", "linear", "ab", "reg", "pca", "hi")
+ALLOWED_TOKENS <- c("base", "naive", "snaive", "linear", "ab", "convex", "reg", "pca", "hi")
 
 parse_variant <- function(v) {
-  tok <- strsplit(tolower(trimws(v)), "+", fixed = TRUE)[[1]]
+  v_norm <- gsub("alpha_1minus_alpha", "convex", tolower(trimws(v)), fixed = TRUE)
+  tok <- strsplit(v_norm, "+", fixed = TRUE)[[1]]
   bad <- setdiff(tok, ALLOWED_TOKENS)
   if (length(bad)) stop("Unknown variant token(s): ", paste(bad, collapse = ", "),
                         "  (allowed: ", paste(ALLOWED_TOKENS, collapse = " "), ")")
   fam <- if (tok[1] %in% c("naive", "snaive", "linear")) tok[1] else "timekan"
   list(name = paste(tok, collapse = "+"), family = fam,
-       ab  = "ab"  %in% tok && fam == "timekan",
-       reg = "reg" %in% tok && fam == "timekan",
-       hi  = "hi"  %in% tok && fam == "timekan",
-       pca = "pca" %in% tok && !(fam %in% c("naive", "snaive")))
+       ab     = "ab"     %in% tok && fam == "timekan",
+       convex = "convex" %in% tok && fam == "timekan",
+       reg    = "reg"    %in% tok && fam == "timekan",
+       hi     = "hi"     %in% tok && fam == "timekan",
+       pca    = "pca"    %in% tok && !(fam %in% c("naive", "snaive")))
 }
 
 run_tag <- function(key, variant, pred_len, seed) {
@@ -288,25 +290,42 @@ define_models <- function() {
   )
   
   # M-KAN block: depthwise conv (time) + Chebyshev KAN (channels), Eqs. (5), (9), (10).
+  # learnable_mix can be "none" (or FALSE), "ab" (or TRUE), or "convex" (alpha, 1-alpha)
   mkan <- nn_module(
     "MKAN",
     initialize = function(dim, order, kernel_size = 3, learnable_mix = FALSE) {
       self$dwconv <- nn_conv1d(dim, dim, kernel_size, padding = kernel_size %/% 2, groups = dim)
       self$kan <- cheby_kan(dim, order)
       self$learnable_mix <- learnable_mix
-      if (learnable_mix) {
+      is_ab <- identical(learnable_mix, TRUE) || identical(learnable_mix, "ab")
+      is_cvx <- identical(learnable_mix, "convex") || identical(learnable_mix, "alpha_1minus_alpha")
+      if (is_ab) {
         self$alpha <- nn_parameter(torch_ones(1))
         self$beta  <- nn_parameter(torch_ones(1))
+      } else if (is_cvx) {
+        self$mix_weight <- nn_parameter(torch_zeros(1))
       }
     },
     forward = function(f) {                         # f: [B, L, D]
       f1 <- self$dwconv(f$transpose(2, 3))$transpose(2, 3)
       f2 <- self$kan(f)
-      if (self$learnable_mix) self$alpha * f1 + self$beta * f2 else f1 + f2
+      if (identical(self$learnable_mix, TRUE) || identical(self$learnable_mix, "ab")) {
+        self$alpha * f1 + self$beta * f2
+      } else if (identical(self$learnable_mix, "convex") || identical(self$learnable_mix, "alpha_1minus_alpha")) {
+        a <- torch_sigmoid(self$mix_weight)
+        a * f1 + (1 - a) * f2
+      } else {
+        f1 + f2
+      }
     },
     penalty = function() {
       p <- self$kan$penalty()
-      if (self$learnable_mix) p <- self$beta$pow(2)$sum() * p   # penalise beta * theta
+      if (identical(self$learnable_mix, TRUE) || identical(self$learnable_mix, "ab")) {
+        p <- self$beta$pow(2)$sum() * p   # penalise beta * theta
+      } else if (identical(self$learnable_mix, "convex") || identical(self$learnable_mix, "alpha_1minus_alpha")) {
+        b <- 1 - torch_sigmoid(self$mix_weight)
+        p <- b$pow(2)$sum() * p
+      }
       p
     }
   )
@@ -405,9 +424,10 @@ define_models <- function() {
 }
 
 build_model <- function(M, vc, opt, pred_len, season) {
+  mix <- if (isTRUE(vc$convex)) "convex" else if (isTRUE(vc$ab)) "ab" else FALSE
   switch(vc$family,
          timekan = M$timekan(opt$seq_len, pred_len, opt$d_model, opt$levels, opt$window, opt$layers,
-                             opt$base_order + if (vc$hi) 2 else 0, vc$ab),
+                             opt$base_order + if (vc$hi) 2 else 0, mix),
          linear  = M$linear(opt$seq_len, pred_len),
          naive   = M$naive(opt$seq_len, pred_len, 0),
          snaive  = M$naive(opt$seq_len, pred_len, season))
@@ -583,13 +603,18 @@ train_one <- function(ds, vc, opt, seed, pred_len, M) {
   detail <- list(x = smp$x, y = smp$y, p = smp$p, ch = smp$ch, step_mse = te$step_mse, chan_mse = te$chan_mse,
                  cumvar = if (!is.null(pc)) pc$cumvar else NULL, pca_r = if (!is.null(pc)) pc$r else NULL,
                  pca_floor = floor_mse, ab = NULL)
-  if (vc$family == "timekan" && vc$ab) {
+  if (vc$family == "timekan" && (vc$ab || vc$convex)) {
     alpha <- beta <- matrix(NA_real_, opt$layers, opt$levels)
     for (l in seq_len(opt$layers)) for (i in seq_len(opt$levels)) {
       m <- model$layers[[l]]$mkans[[i]]
-      alpha[l, i] <- m$alpha$item(); beta[l, i] <- m$beta$item()
+      if (vc$convex) {
+        a <- torch_sigmoid(m$mix_weight)$item()
+        alpha[l, i] <- a; beta[l, i] <- 1 - a
+      } else {
+        alpha[l, i] <- m$alpha$item(); beta[l, i] <- m$beta$item()
+      }
     }
-    detail$ab <- list(alpha = alpha, beta = beta)
+    detail$ab <- list(alpha = alpha, beta = beta, mode = if (vc$convex) "convex" else "ab")
   }
   assemble_result(ds$key, vc$name, vc$family, pred_len, l_in, seed, N, n_in, params, hist, best_epoch,
                   train_sec, best_val, te$mse, te$mae, floor_mse, if (use_reg) opt$lambda else 0,
