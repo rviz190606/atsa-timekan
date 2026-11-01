@@ -60,6 +60,28 @@ Rscript plots.R        # figures/ and results/comparison.csv (works on partial r
 - `results/comparison.csv` puts our MSE/MAE next to the paper's.
 - `figures/` holds the decomposition, an example forecast, results vs. the paper, and the ablations.
 
+## Extension: is "higher order for higher frequency" right?
+
+The paper gives high-frequency bands higher-order KANs, because they supposedly need more complex functions.
+Two experiments test this:
+
+```bash
+./run_order_experiment.sh   # 4 order assignments x ETTh1/ETTh2 x horizons 96/336 x 3 seeds (~45 min)
+./run_basis_experiment.sh   # 4 other basis families, same grid (~45 min; reuses the Chebyshev runs above)
+Rscript extension.R         # figures + summaries
+```
+
+1. **Order assignment.** Four assignments are compared: the paper's (3,2,1), reversed (1,2,3), all 2 (2,2,2), and all 3
+   (3,3,3). The first three have identical parameter counts. Output: `figures/order_results.png` and
+   `results/order_summary.csv`.
+2. **Looking inside the KANs.** This uses the all-order-3 models, where every band has the same capacity. On real test
+   inputs, each band's KAN output is split into a simple part (degrees 0–1) and a curved part (degrees ≥ 2). The
+   *curvature share* measures how much each band actually uses bends. Output: `figures/kan_nonlinearity.png`,
+   `figures/kan_functions.png` and `results/kan_curvature.csv`.
+3. **Basis swap.** The Chebyshev polynomials are replaced by Legendre polynomials, a Fourier basis, or Gaussian radial
+   basis functions. Each uses the same number of functions per band, so the parameter count is identical. A plain linear
+   layer is the control. Output: `figures/basis_results.png` and `results/basis_summary.csv`.
+
 ## Options
 
 | Flag | Default | Meaning |
@@ -72,6 +94,8 @@ Rscript plots.R        # figures/ and results/comparison.csv (works on partial r
 | `--layers` | 2 | number of stacked blocks L |
 | `--base_order` | 1 | lowest Chebyshev order b |
 | `--fixed_order` | 0 | if > 0, same KAN order at every level (ablation) |
+| `--order_mode` | paper | `paper` (high frequency → high order) or `reversed` |
+| `--basis` | chebyshev | KAN function family: `chebyshev`, `legendre`, `fourier`, `rbf`, `linear` |
 | `--split` | auto | `auto`, `etth`, `ettm` or `712` |
 | `--epochs` | 10 | maximum training epochs |
 | `--patience` | 3 | early stopping: epochs without a better validation MSE |

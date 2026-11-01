@@ -15,3 +15,8 @@
 
 # Experiment progress log
 run.log
+run_order.log
+
+# Keep experiment results (data CSVs above stay ignored)
+!results/*.csv
+run_basis.log

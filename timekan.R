@@ -39,43 +39,79 @@ frequency_upsample <- function(x, target_len) {
 }
 
 
-# 1-layer Chebyshev KAN over the channel dimension, Eqs. (6)-(8):
-#   phi_o(x) = sum_j sum_{i=0..n} Theta[o, j, i] * T_i(tanh(x_j))
-# Each input->output edge has its own learnable polynomial instead of a fixed weight.
+# Basis functions g_0..g_n evaluated at x, stacked on a new last dim: [..., n+1].
+# The paper uses Chebyshev polynomials; the others are for the basis-swap extension.
+# Every basis returns n+1 functions for "order" n, so swapping keeps the parameter count.
+#   chebyshev: T_0..T_n of tanh(x)            T_0 = 1, T_1 = u, T_{k+1} = 2u T_k - T_{k-1}
+#   legendre:  P_0..P_n of tanh(x)            P_0 = 1, P_1 = u, (k+1) P_{k+1} = (2k+1) u P_k - k P_{k-1}
+#   fourier:   1, sin(pi u/2), cos(pi u/2), sin(pi u), cos(pi u), ...   (first n+1 of these)
+#   rbf:       n+1 Gaussian bumps on u, centres evenly spaced over [-1, 1]
+#   linear:    1, x  (control: an ordinary linear layer, ignores n)
+# Here u = tanh(x) squashes inputs into [-1, 1], the natural domain of these bases.
+kan_basis <- function(x, order, basis = "chebyshev") {
+  if (basis == "linear") return(torch_stack(list(torch_ones_like(x), x), dim = -1))
+  u <- torch_tanh(x)
+  n <- order
+  g <- switch(basis,
+    chebyshev = {
+      g <- list(torch_ones_like(u), u)
+      if (n >= 2) for (k in 1:(n - 1)) g[[k + 2]] <- 2 * u * g[[k + 1]] - g[[k]]
+      g
+    },
+    legendre = {
+      g <- list(torch_ones_like(u), u)
+      if (n >= 2) for (k in 1:(n - 1)) g[[k + 2]] <- ((2 * k + 1) * u * g[[k + 1]] - k * g[[k]]) / (k + 1)
+      g
+    },
+    fourier = {
+      g <- list(torch_ones_like(u))
+      m <- 1
+      while (length(g) < n + 1) {
+        g[[length(g) + 1]] <- torch_sin(m * pi * u / 2)
+        g[[length(g) + 1]] <- torch_cos(m * pi * u / 2)
+        m <- m + 1
+      }
+      g
+    },
+    rbf = {
+      centres <- seq(-1, 1, length.out = n + 1)
+      width <- 2 / max(n, 1)                    # neighbouring bumps overlap
+      lapply(centres, function(c) torch_exp(-((u - c) / width)^2))
+    },
+    stop("unknown basis: ", basis))
+  torch_stack(g[1:(n + 1)], dim = -1)
+}
+
+# 1-layer KAN over the channel dimension, Eqs. (6)-(8):
+#   phi_o(x) = sum_j sum_{i=0..n} Theta[o, j, i] * g_i(x_j)
+# Each input->output edge has its own learnable function instead of a fixed weight.
+# With the default Chebyshev basis this is the paper's ChebyKAN.
 cheby_kan <- nn_module(
-  "ChebyKAN",
-  initialize = function(dim, order) {
+  "KAN",
+  initialize = function(dim, order, basis = "chebyshev") {
     self$order <- order
-    # Theta: [D_out, D_in, order + 1]
-    self$coeffs <- nn_parameter(torch_randn(dim, dim, order + 1) / (dim * (order + 1)))
+    self$basis <- basis
+    n_funcs <- if (basis == "linear") 2 else order + 1
+    # Theta: [D_out, D_in, number of basis functions]
+    self$coeffs <- nn_parameter(torch_randn(dim, dim, n_funcs) / (dim * n_funcs))
   },
   forward = function(x) {                       # x: [..., D]
-    x <- torch_tanh(x)                          # squash into [-1, 1], the Chebyshev domain
-    # T_n(x) = cos(n arccos x), computed with the stable recurrence
-    # T_0 = 1, T_1 = x, T_{n+1} = 2x T_n - T_{n-1}.
-    polys <- list(torch_ones_like(x), x)
-    if (self$order >= 2) {
-      for (n in 2:self$order) {
-        k <- length(polys)
-        polys[[k + 1]] <- 2 * x * polys[[k]] - polys[[k - 1]]
-      }
-    }
-    polys <- torch_stack(polys[1:(self$order + 1)], dim = -1)   # [..., D_in, order+1]
-    # Sum over input channel j and polynomial degree i for each output channel o.
-    torch_einsum("...ji,oji->...o", list(polys, self$coeffs))   # [..., D_out]
+    g <- kan_basis(x, self$order, self$basis)   # [..., D_in, n_funcs]
+    # Sum over input channel j and basis function i for each output channel o.
+    torch_einsum("...ji,oji->...o", list(g, self$coeffs))   # [..., D_out]
   }
 )
 
 
 # M-KAN block for one frequency band, Eqs. (5), (9), (10). Two parallel branches:
 #   - depthwise conv along time    (temporal dependency)
-#   - Chebyshev KAN along channels (representation learning)
+#   - KAN along channels           (representation learning; Chebyshev in the paper)
 mkan <- nn_module(
   "MKAN",
-  initialize = function(dim, order, kernel_size = 3) {
+  initialize = function(dim, order, kernel_size = 3, basis = "chebyshev") {
     # groups = dim makes it depthwise: each channel gets its own 1D filter.
     self$dwconv <- nn_conv1d(dim, dim, kernel_size, padding = kernel_size %/% 2, groups = dim)
-    self$kan <- cheby_kan(dim, order)
+    self$kan <- cheby_kan(dim, order, basis)
   },
   forward = function(f) {                                   # f: [B, L, D]
     f1 <- self$dwconv(f$transpose(2, 3))$transpose(2, 3)    # Eq. (5); conv wants [B, D, L]
@@ -85,28 +121,45 @@ mkan <- nn_module(
 )
 
 
+# Chebyshev order of the KAN for each band (band 1 = highest frequency).
+#   "paper":    b + k - i, so the highest-frequency band gets the highest order (k=3, b=1: 3,2,1)
+#   "reversed": b + i - 1, the opposite assignment                         (k=3, b=1: 1,2,3)
+#   fixed_order > 0 overrides both and gives every band that order (ablation, paper Table 3).
+band_orders <- function(k, base_order, fixed_order = 0, order_mode = "paper") {
+  if (fixed_order > 0) return(rep(fixed_order, k))
+  switch(order_mode,
+         paper    = base_order + k - (1:k),
+         reversed = base_order + (1:k) - 1,
+         stop("unknown order_mode: ", order_mode))
+}
+
+
 # One Decomposition -> Learning -> Mixing pass over k levels.
 # Input/output: a list of k tensors; xs[[1]] is the finest (longest) level.
 timekan_layer <- nn_module(
   "TimeKANLayer",
-  initialize = function(dim, num_levels, base_order, fixed_order = 0) {
-    k <- num_levels
-    # Level i gets order b + k - i: highest frequency band -> highest polynomial order.
-    # fixed_order > 0 instead gives every level the same order (ablation, paper Table 3).
-    order_of <- function(i) if (fixed_order > 0) fixed_order else base_order + k - i
-    self$mkans <- nn_module_list(lapply(1:k, function(i) mkan(dim, order_of(i))))
+  initialize = function(dim, num_levels, base_order, fixed_order = 0, order_mode = "paper",
+                        basis = "chebyshev") {
+    self$orders <- band_orders(num_levels, base_order, fixed_order, order_mode)
+    self$mkans <- nn_module_list(lapply(self$orders, function(o) mkan(dim, o, basis = basis)))
   },
-  forward = function(xs) {
-    k <- length(xs)
 
-    # --- Cascaded Frequency Decomposition, Eq. (4) ---
-    # f_i = x_i - FreqUp(x_{i+1}): what level i has that the smoother level i+1 lacks.
-    # The last (smoothest) level keeps the remaining low frequencies as-is.
+  # --- Cascaded Frequency Decomposition, Eq. (4) ---
+  # f_i = x_i - FreqUp(x_{i+1}): what level i has that the smoother level i+1 lacks.
+  # The last (smoothest) level keeps the remaining low frequencies as-is.
+  decompose = function(xs) {
+    k <- length(xs)
     fs <- vector("list", k)
     for (i in seq_len(k - 1)) {
       fs[[i]] <- xs[[i]] - frequency_upsample(xs[[i + 1]], xs[[i]]$size(2))
     }
     fs[[k]] <- xs[[k]]
+    fs
+  },
+
+  forward = function(xs) {
+    k <- length(xs)
+    fs <- self$decompose(xs)
 
     # --- Multi-order KAN Representation Learning (one M-KAN per band) ---
     for (i in 1:k) fs[[i]] <- self$mkans[[i]](fs[[i]])
@@ -130,7 +183,8 @@ timekan_layer <- nn_module(
 timekan <- nn_module(
   "TimeKAN",
   initialize = function(seq_len, pred_len, d_model = 16, num_levels = 3, window = 2,
-                        num_layers = 2, base_order = 1, fixed_order = 0) {
+                        num_layers = 2, base_order = 1, fixed_order = 0,
+                        order_mode = "paper", basis = "chebyshev") {
     stopifnot("seq_len must be divisible by window^(levels - 1)" =
                 seq_len %% (window^(num_levels - 1)) == 0)
     self$num_levels <- num_levels
@@ -139,13 +193,14 @@ timekan <- nn_module(
     # Embed each scalar time step into D dims, Eq. (2) (one Linear per level).
     self$embeds <- nn_module_list(lapply(1:num_levels, function(i) nn_linear(1, d_model)))
     self$layers <- nn_module_list(lapply(1:num_layers, function(i)
-      timekan_layer(d_model, num_levels, base_order, fixed_order)))
+      timekan_layer(d_model, num_levels, base_order, fixed_order, order_mode, basis)))
     # Forecast head, Eq. (12): project D -> 1, then time T -> F.
     self$proj_dim <- nn_linear(d_model, 1)
     self$proj_time <- nn_linear(seq_len, pred_len)
   },
 
-  forward = function(x) {                       # x: [B, T, N]
+  # Normalise and build the embedded multi-level sequences (everything before the layers).
+  encode = function(x) {                        # x: [B, T, N]
     B <- x$size(1); T <- x$size(2); N <- x$size(3)
 
     # RevIN (reversible instance norm): normalise each window, undo it at the end.
@@ -165,6 +220,12 @@ timekan <- nn_module(
     }
     xs <- lapply(seq_along(levels), function(i)
       self$embeds[[i]](levels[[i]]$transpose(2, 3)))         # each [B*N, L_i, D]
+    list(xs = xs, mu = mu, sigma = sigma, B = B, N = N)
+  },
+
+  forward = function(x) {                       # x: [B, T, N]
+    e <- self$encode(x)
+    xs <- e$xs
 
     # --- L stacked Decomposition-Learning-Mixing layers ---
     for (i in seq_along(self$layers)) xs <- self$layers[[i]](xs)
@@ -172,9 +233,9 @@ timekan <- nn_module(
     # --- Forecast from the finest-level sequence x_1, Eq. (12) ---
     y <- self$proj_dim(xs[[1]])$squeeze(-1)                  # [B*N, T]
     y <- self$proj_time(y)                                   # [B*N, F]
-    y <- y$reshape(c(B, N, -1))$permute(c(1, 3, 2))          # [B, F, N] (stack variates back)
+    y <- y$reshape(c(e$B, e$N, -1))$permute(c(1, 3, 2))      # [B, F, N] (stack variates back)
 
-    y * sigma + mu                                           # undo RevIN
+    y * e$sigma + e$mu                                       # undo RevIN
   }
 )
 
@@ -295,6 +356,8 @@ default_options <- list(
   layers = 2,            # number of stacked blocks L
   base_order = 1,        # lowest Chebyshev order b
   fixed_order = 0,       # if > 0, use this KAN order at every level (ablation)
+  order_mode = "paper",  # "paper" (high freq -> high order) or "reversed" (see band_orders)
+  basis = "chebyshev",   # KAN function family: chebyshev, legendre, fourier, rbf, linear
   epochs = 10,
   patience = 3,          # stop after this many epochs without a better val MSE
   batch_size = 32,
@@ -334,7 +397,8 @@ run_experiment <- function(opt) {
                batch_size = opt$batch_size, shuffle = (k == "train")))
 
   model <- timekan(opt$seq_len, opt$pred_len, opt$d_model, opt$levels,
-                   opt$window, opt$layers, opt$base_order, opt$fixed_order)
+                   opt$window, opt$layers, opt$base_order, opt$fixed_order,
+                   opt$order_mode, opt$basis)
   model$to(device = device)
   n_params <- sum(sapply(model$parameters, function(p) p$numel()))
   cat(sprintf("TimeKAN parameters: %s\n", format(n_params, big.mark = ",")))
@@ -378,7 +442,8 @@ run_experiment <- function(opt) {
     row <- data.frame(
       dataset = if (nzchar(opt$csv)) sub("\\.csv$", "", basename(opt$csv)) else "synthetic",
       tag = opt$tag, seq_len = opt$seq_len, pred_len = opt$pred_len, levels = opt$levels,
-      base_order = opt$base_order, fixed_order = opt$fixed_order, d_model = opt$d_model, seed = opt$seed,
+      base_order = opt$base_order, fixed_order = opt$fixed_order,
+      order_mode = opt$order_mode, basis = opt$basis, d_model = opt$d_model, seed = opt$seed,
       params = n_params, epochs_run = epoch, minutes = round(minutes, 2),
       val_mse = best_val, test_mse = test[["mse"]], test_mae = test[["mae"]])
     write.table(row, opt$out, sep = ",", row.names = FALSE,
