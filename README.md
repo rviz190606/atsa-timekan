@@ -12,13 +12,16 @@ four forecast cases, 12 variables per dataset, complete MSE/MAE tables and
 five selected plots. The [five-method overview](figures/india/learned_baselines/learned_baseline_comparison.png)
 compares the models under identical data splits and target masks.
 
-## How it works
+## Layer-depth experiment
 
-The new [layer-depth experiment](docs/DEPTH_EXPERIMENT.md) sweeps
-L = 1, 2, 3, 4, 5, 10, 20 on ETTh1, ETTh2 and ETTm1 with one seed.
-Run `Rscript run_depth_experiment.R --device cuda`; it produces consolidated
-MSE/MAE tables and two accuracy/convergence figures. See the protocol for training
-limits and interpretation; implementation alone does not imply completed results.
+Completed **21 single-seed runs** on ETTh1, ETTh2 and ETTm1, sweeping
+L = 1, 2, 3, 4, 5, 10, 20 with a fixed short training budget.
+**[Read the protocol, all MSE/MAE numbers and two selected plots](docs/DEPTH_EXPERIMENT.md).**
+Models, preprocessing, training, evaluation and plotting are implemented in R.
+Run `Rscript run_depth_experiment.R --device cuda`, or use the
+[Kaggle notebook](notebooks/TimeKAN_Layer_Depth_Kaggle.ipynb).
+
+## How it works
 
 TimeKAN splits a time series into frequency bands, learns each band separately, then recombines them:
 

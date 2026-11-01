@@ -1,0 +1,58 @@
+{
+  "gpu": "0, Tesla T4\n1, Tesla T4\n",
+  "sources_sha256": {
+    "timekan.R": "9cf5e343beccf7364c4a8315a4b03989197865293f1049f13f0388a4f2e57432",
+    "run_depth_experiment.R": "d164fce622d425eebb0d4ea591fa51f0c7ee4377c120d7dda3d98ac16a9d980e",
+    "run_depth_kaggle.py": "bd8375d7203469121fe82df0f8bd7675daf751c743dd152cfe7e7aa685e14f1d"
+  },
+  "seed": 0,
+  "datasets": [
+    "ETTh1",
+    "ETTh2",
+    "ETTm1"
+  ],
+  "depths": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    10,
+    20
+  ],
+  "max_epochs": 10,
+  "patience": 3,
+  "history": 96,
+  "horizon": 96,
+  "parallelism": "one independent R training process per GPU",
+  "git_source_blobs": {
+    "timekan.R": "c80a63a0a04be5775f3d312abdc66acd95b0c2da",
+    "run_depth_experiment.R": "6149de8494ad3184ddb40ecd8b9e8e4c7134c9c4",
+    "run_depth_kaggle.py": "3023e4c3c03ea21dfe37aee746700246cf6650a1"
+  },
+  "metrics_scale": "Per-variable training-set z-score; all seven variables and all eligible rolling test origins.",
+  "verification": {
+    "completed_runs": 21,
+    "unique_seed": 0,
+    "checks": [
+      "expected dataset/depth grid",
+      "ETT split/window counts",
+      "fixed settings",
+      "validation checkpoint selection",
+      "early stopping and budget flags",
+      "metric consistency",
+      "parameter counts",
+      "archived source hashes",
+      "canonical Git source blobs"
+    ]
+  },
+  "publication_plotting": {
+    "script": "scripts/depth/plot_results.R",
+    "sha256": "14d7b8aba2d77f35e502b53f2ac8738ebb10e464308d001054e08e20602e50f7",
+    "inputs": [
+      "results/depth/summary.csv",
+      "results/depth/learning_curves.csv"
+    ],
+    "note": "Presentation layout only; no models retrained and no scores changed. Depth axis uses discrete categories."
+  }
+}
