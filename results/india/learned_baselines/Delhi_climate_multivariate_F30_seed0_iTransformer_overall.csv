@@ -1,4 +1,0 @@
-"model","mse_standardized","mae_standardized","observed_targets"
-"iTransformer",0.678130043326502,0.481465281061679,295200
-"Persistence",1.06561561749343,0.517035771777329,295200
-"SeasonalNaive",1.11773431578816,0.549114245379109,295200

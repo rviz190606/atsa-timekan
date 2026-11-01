@@ -9,7 +9,7 @@ Put this file and `run_india_multivariate.R` in the repository root beside `time
 
 | Source | Selection | History | Horizons |
 |---|---|---|---|
-| rohanrao/air-quality-data-in-india | Delhi hourly city aggregates, 2018–2019; up to 12 pollutants | 96 hours | 24, 96 hours |
+| rohanrao/air-quality-data-in-india | Delhi hourly city aggregates, 2018â€“2019; up to 12 pollutants | 96 hours | 24, 96 hours |
 | yug201/daily-climate-time-series-data-delhi-india | Full supplied daily weather table; numeric weather measurements | 96 days | 7, 30 days |
 
 Air fields: PM2.5, PM10, NO, NO2, NOx, NH3, CO, SO2, O3, Benzene, Toluene, Xylene.
@@ -113,6 +113,18 @@ masked gradients, unchanged TimeKAN forward/backward, and metric denominators
 against a hand-computed persistence error. It runs quickly on CPU inside Colab.
 
 
-## Repository layout
+## Repository layout and selected outputs
 
-Checked-in PNGs and newly generated plots are in `figures/india/timekan/` and `figures/india/learned_baselines/`. Numerical tables and lightweight run records are in `results/india/`. Reference sources and licenses are in `third_party/india_baselines/`; the optional Python parity checker is in `tests/india/`. Run the R commands from the repository root. Raw data and model weights are not included.
+The repository retains five presentation figures under
+`figures/india/learned_baselines/`: the overall comparison and one forecast
+example per dataset/horizon. Combined tables and compact completion records
+remain under `results/india/`; redundant per-run CSV exports and diagnostic PNGs
+are omitted from Git. All detailed images and numerical exports described above
+can still be regenerated with the R commands, without retraining. Ignore rules
+keep those extra generated files out of future commits. The results index
+`INDIAN_RESULTS.md` links the five selected figures.
+
+Reference sources and licenses are under `third_party/india_baselines/`, and the
+optional parity checker is under `tests/india/`. The checked-in JSON parity
+report records the verification results; the self-test regenerates its temporary
+CSV tensors when rerun. Run R commands from the repository root.

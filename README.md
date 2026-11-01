@@ -7,9 +7,9 @@ A minimal R implementation (using the [`torch`](https://torch.mlverse.org/) pack
 New multivariate comparisons on Delhi air quality and Delhi weather cover
 TimeKAN, DLinear, iTransformer, persistence and seasonal-naive forecasting.
 
-**[Read the results and reproduce the experiments](INDIAN_RESULTS.md)** —
+**[Read the results and reproduce the experiments](INDIAN_RESULTS.md)** â€”
 four forecast cases, 12 variables per dataset, complete MSE/MAE tables and
-58 plots. The [five-method overview](figures/india/learned_baselines/learned_baseline_comparison.png)
+five selected plots. The [five-method overview](figures/india/learned_baselines/learned_baseline_comparison.png)
 compares the models under identical data splits and target masks.
 
 ## How it works
@@ -17,11 +17,11 @@ compares the models under identical data splits and target masks.
 TimeKAN splits a time series into frequency bands, learns each band separately, then recombines them:
 
 1. **Hierarchical preprocessing**: moving averages build progressively smoother copies of the input, and each copy is embedded into `d_model` dimensions.
-2. **Cascaded Frequency Decomposition**: each band is `f_i = x_i − FreqUp(x_{i+1})`, where `FreqUp` upsamples with FFT → zero-pad → inverse FFT.
+2. **Cascaded Frequency Decomposition**: each band is `f_i = x_i âˆ’ FreqUp(x_{i+1})`, where `FreqUp` upsamples with FFT â†’ zero-pad â†’ inverse FFT.
 3. **Multi-order KAN learning**: each band goes through a depthwise conv plus a Chebyshev KAN. Higher-frequency bands get a higher polynomial order.
-4. **Frequency Mixing**: bands are added back together from the lowest up, `x_i = FreqUp(x_{i+1}) + f̂_i`.
+4. **Frequency Mixing**: bands are added back together from the lowest up, `x_i = FreqUp(x_{i+1}) + fÌ‚_i`.
 
-Steps 2–4 repeat `--layers` times, then a linear head produces the forecast. Each variable is forecast independently.
+Steps 2â€“4 repeat `--layers` times, then a linear head produces the forecast. Each variable is forecast independently.
 
 ## Setup
 
@@ -85,7 +85,7 @@ Rscript extension.R         # figures + summaries
    (3,3,3). The first three have identical parameter counts. Output: `figures/order_results.png` and
    `results/order_summary.csv`.
 2. **Looking inside the KANs.** This uses the all-order-3 models, where every band has the same capacity. On real test
-   inputs, each band's KAN output is split into a simple part (degrees 0–1) and a curved part (degrees ≥ 2). The
+   inputs, each band's KAN output is split into a simple part (degrees 0â€“1) and a curved part (degrees â‰¥ 2). The
    *curvature share* measures how much each band actually uses bends. Output: `figures/kan_nonlinearity.png`,
    `figures/kan_functions.png` and `results/kan_curvature.csv`.
 3. **Basis swap.** The Chebyshev polynomials are replaced by Legendre polynomials, a Fourier basis, or Gaussian radial
@@ -104,7 +104,7 @@ Rscript extension.R         # figures + summaries
 | `--layers` | 2 | number of stacked blocks L |
 | `--base_order` | 1 | lowest Chebyshev order b |
 | `--fixed_order` | 0 | if > 0, same KAN order at every level (ablation) |
-| `--order_mode` | paper | `paper` (high frequency → high order) or `reversed` |
+| `--order_mode` | paper | `paper` (high frequency â†’ high order) or `reversed` |
 | `--basis` | chebyshev | KAN function family: `chebyshev`, `legendre`, `fourier`, `rbf`, `linear` |
 | `--split` | auto | `auto`, `etth`, `ettm` or `712` |
 | `--epochs` | 10 | maximum training epochs |
@@ -117,7 +117,7 @@ Rscript extension.R         # figures + summaries
 | `--save` | | save the trained model to this file |
 | `--tag` | | label stored in the results row |
 
-`seq_len` must be divisible by `window^(levels − 1)`.
+`seq_len` must be divisible by `window^(levels âˆ’ 1)`.
 
 ## Notes
 

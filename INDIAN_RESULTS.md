@@ -2,7 +2,7 @@
 
 Completed multivariate forecasting experiments on Delhi air quality and Delhi
 daily weather: **12 variables per dataset, four forecast cases, 12 trained runs**
-(four TimeKAN, four DLinear, four iTransformer), and **58 PNG figures**.
+(four TimeKAN, four DLinear, four iTransformer), and **five selected PNG figures**.
 
 ## Results
 
@@ -24,12 +24,30 @@ MSE; MAE rankings can differ. Single-seed, up-to-10-epoch results do not establi
 statistical significance or a general ranking. The iTransformer uses a compact
 128-dimensional configuration, not the published benchmark configuration.
 
+## Selected figures
+
+The repository keeps only the overall comparison and one forecast example for
+each forecasting case. Each example shows four variables at the first test
+origin; the overview scores all 12 variables across all eligible test windows.
+
+| Plot | Link |
+|---|---|
+| Overall MSE/MAE comparison: all methods and horizons | [Comparison](figures/india/learned_baselines/learned_baseline_comparison.png) |
+| Air quality: 24-hour forecast | [Forecast](figures/india/learned_baselines/Delhi_air_multivariate_F24_forecast_comparison_1.png) |
+| Air quality: 96-hour forecast | [Forecast](figures/india/learned_baselines/Delhi_air_multivariate_F96_forecast_comparison_1.png) |
+| Weather: 7-day forecast | [Forecast](figures/india/learned_baselines/Delhi_climate_multivariate_F7_forecast_comparison_1.png) |
+| Weather: 30-day forecast | [Forecast](figures/india/learned_baselines/Delhi_climate_multivariate_F30_forecast_comparison_1.png) |
+
+Detailed diagnostics can be regenerated from the saved records; they are ignored
+by Git. Only combined metric tables, compact completion records, and the official
+parity-check report are retained. Redundant per-run CSV exports and text copies
+of record metadata are omitted.
+
 ## Browse the outputs
 
 | Content | Location |
 |---|---|
-| TimeKAN vs simple baselines: 29 PNGs | [figures/india/timekan](figures/india/timekan/) |
-| Five-method comparisons: 29 PNGs | [figures/india/learned_baselines](figures/india/learned_baselines/) |
+| Five selected comparison/forecast plots | [figures/india/learned_baselines](figures/india/learned_baselines/) |
 | Full MSE/MAE comparison | [all_models.csv](results/india/learned_baselines/all_models.csv) |
 | Errors for individual variables | [all_models_per_variable.csv](results/india/learned_baselines/all_models_per_variable.csv) |
 | Errors by forecast lead | [all_models_by_horizon.csv](results/india/learned_baselines/all_models_by_horizon.csv) |
