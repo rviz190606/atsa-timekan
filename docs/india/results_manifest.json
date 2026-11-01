@@ -1,0 +1,727 @@
+[
+  {
+    "path": "docs/india/INDIA_MULTIVARIATE.md",
+    "bytes": 6653,
+    "sha256": "8fc61813950e326a574eb4f4712d2652897606834b12fd752586b39900306287"
+  },
+  {
+    "path": "docs/india/LEARNED_BASELINES.md",
+    "bytes": 8200,
+    "sha256": "78178db50857ae8b9671a841e538f218e22109dadc30baed8fb7bbb4b6b885b8"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F24_forecast_comparison_1.png",
+    "bytes": 255910,
+    "sha256": "4d624d61e141d0a9d38f5598288d2c8921039b8206fdc3b2b8b405980d4126d5"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F24_forecast_comparison_2.png",
+    "bytes": 243216,
+    "sha256": "50b414c210564c930d0d65daef2c20c546960570febd52ca88d4e1640a85c7b2"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F24_forecast_comparison_3.png",
+    "bytes": 242790,
+    "sha256": "dc4c4daa10c7301a5ce596cb69ba9f07321b8257c14c33ec8b9300dc08c3867d"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F24_horizon_errors.png",
+    "bytes": 137097,
+    "sha256": "1fcc61ce57b7d64649297961073e86f205dabe001e840780f9cffd78ec7eb90b"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F24_per_variable.png",
+    "bytes": 112443,
+    "sha256": "c3fde93ee7840690f6639406449e3ace4920463e42b7d17956d66b65369c5dde"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F24_seed0_DLinear_training.png",
+    "bytes": 76180,
+    "sha256": "39e03cdfa779daab9099bd38db37234e92eeafc2b18909de57295d890da94ab5"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F24_seed0_iTransformer_training.png",
+    "bytes": 87006,
+    "sha256": "b30d6c7ccb4f4f5628f5f0347e0860e7ff45438ceb1d40b1bfce080e927a69fc"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F96_forecast_comparison_1.png",
+    "bytes": 358859,
+    "sha256": "54b91431129b586d6749756eac87e2330dffddec9cf6371d4741d5493ff08024"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F96_forecast_comparison_2.png",
+    "bytes": 344040,
+    "sha256": "104bdbb9ef429b03dd00dee5f8ad5ef59c426aaa1c4088a8f0b2abac217b4807"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F96_forecast_comparison_3.png",
+    "bytes": 325670,
+    "sha256": "c1946e94674bd35794dec0749d7ae55d3693b06efa7e54c7f883dd0c89fc74e5"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F96_horizon_errors.png",
+    "bytes": 171661,
+    "sha256": "a571e968b33468d662b14155589d1dd8dc04cd5a702c2daed97db3fb6a309038"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F96_per_variable.png",
+    "bytes": 109554,
+    "sha256": "bfec084556df295b4ff5cd8ebfa9555a1e771d3cd30723a676827361fa2a06c1"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F96_seed0_DLinear_training.png",
+    "bytes": 74831,
+    "sha256": "1f1a16aff51679790eb2062c78f9b197d430030bd14c3a6c2470f4a61f48fb48"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F96_seed0_iTransformer_training.png",
+    "bytes": 83387,
+    "sha256": "ec4caf898cc5c7ef791965c47c0abbd927e7430e3e478c5ec986a6b4756ba73c"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F30_forecast_comparison_1.png",
+    "bytes": 281978,
+    "sha256": "d2030ff8281279752987154dbdb8b8aa0150224e87ca3ab711f7006a7b816e09"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F30_forecast_comparison_2.png",
+    "bytes": 273791,
+    "sha256": "577da0075952baf2cf48b1522b95c211d7cb78d3a6d9a3292bb6d1e0ff9a33e9"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F30_forecast_comparison_3.png",
+    "bytes": 309838,
+    "sha256": "443827422b6861a99dca3f190f64def5a10c520632e06ac866916576d9cae0c9"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F30_horizon_errors.png",
+    "bytes": 144607,
+    "sha256": "6c07a4962c25943c2addc273ddb467bcefcb61bff4c439788363688ae524cece"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F30_per_variable.png",
+    "bytes": 134982,
+    "sha256": "10c5e27d8f9c811533090ce9b3d984c7deef1c88e0e1ba145b5a1cc9358fbb29"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_DLinear_training.png",
+    "bytes": 76853,
+    "sha256": "d06c7cf1a98c0efccb586b4da154b119d326e375d7a2b76b440c541960864109"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_iTransformer_training.png",
+    "bytes": 79146,
+    "sha256": "a46e7fbeedc9c02a17edcc450306d2b1fcae06b3b581cab86e3850047590ac5e"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F7_forecast_comparison_1.png",
+    "bytes": 237283,
+    "sha256": "769035107ff683db9d0a256b7cfcf27e20ae30da59b795a4ecf647749506dd38"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F7_forecast_comparison_2.png",
+    "bytes": 227407,
+    "sha256": "80b5e11c3fb6261df7c0a4f2054a26c6ad4371bacc5f5239481b414b56c42b7b"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F7_forecast_comparison_3.png",
+    "bytes": 253841,
+    "sha256": "0cd74b98fdfd7b13aed3ec0e116430097db4a5891591293d71567c6ae579b65d"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F7_horizon_errors.png",
+    "bytes": 129094,
+    "sha256": "3d76cabc8a40bbdf01ba9516359a7810cdd1aedcf5c95779dc66eb052ab978c2"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F7_per_variable.png",
+    "bytes": 131799,
+    "sha256": "00d12252e679ea0de212502e611246b781b480aef30f5358d052f8d748e5e4da"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_DLinear_training.png",
+    "bytes": 82430,
+    "sha256": "3ddfe9c8c35de7006bfa91c7dd7a3ab3cf3e6c051b5f0dccedc702b411321ebe"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_iTransformer_training.png",
+    "bytes": 73244,
+    "sha256": "93d459ebc58dd7f9267eca588523e1eec9d9eed7d113f79c84caa355b39311ba"
+  },
+  {
+    "path": "figures/india/learned_baselines/learned_baseline_comparison.png",
+    "bytes": 155012,
+    "sha256": "96e63970e9f3f586e4bbf483edfb58cc2346903b5d1f8490cf24f43be0411d97"
+  },
+  {
+    "path": "figures/india/timekan/all_datasets_comparison.png",
+    "bytes": 145118,
+    "sha256": "c9d174ff23de1cb1beccf02ffc908c3eba6d6345dd73e0fb20be42e91c492664"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F24_seed0_comparison.png",
+    "bytes": 66238,
+    "sha256": "e785b7f6377aa1e70ee6d1f82ee891074abe4383ba4b72df9322ac4660d528d8"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F24_seed0_forecasts_1.png",
+    "bytes": 217504,
+    "sha256": "f7c84e0f7eac099d5a9f2449b44be18b3a9bb2ffb1dd91aae192d62c361f0069"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F24_seed0_forecasts_2.png",
+    "bytes": 210934,
+    "sha256": "10631dac1431f8caed9dbc9dfed0df99d96993e31cd4ed784865237a81498225"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F24_seed0_forecasts_3.png",
+    "bytes": 211633,
+    "sha256": "afe0af342fd98dd6b734c2690ab3c342a3f92ff0e87e1cb941ed04a3e487ca92"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F24_seed0_horizon_errors.png",
+    "bytes": 109168,
+    "sha256": "45903a99ee94a03e4bff312b5f0c6c382b92cc949d413ac16f4dbeb76bdde47c"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F24_seed0_per_variable.png",
+    "bytes": 115286,
+    "sha256": "7ba221c478958df87f42c788f9500a0580e7ea143381b78b30b992c0935254ff"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F24_seed0_training.png",
+    "bytes": 84128,
+    "sha256": "5c288a1592a1c54e31cfe302e7df9bc7ed8e0bd5749e9837da259d7008b47d69"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F96_seed0_comparison.png",
+    "bytes": 66965,
+    "sha256": "adce18f5236540a55fb26bec753e958bba3b692c25a2343013d7c0499f07bc01"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F96_seed0_forecasts_1.png",
+    "bytes": 271459,
+    "sha256": "91e1359f79c6eaa77ebaa1b342f3e97f403329c9addb9287872ad5e449ec0718"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F96_seed0_forecasts_2.png",
+    "bytes": 262317,
+    "sha256": "67fb7a8b49f9d5d0a946157bc102130b2f8c43405eb18b37febc963b4badfb6e"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F96_seed0_forecasts_3.png",
+    "bytes": 255053,
+    "sha256": "e2a1acdecf4b739c22e01f79666e5fe330b88e1aceb90b0e73303e7196fca6de"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F96_seed0_horizon_errors.png",
+    "bytes": 140002,
+    "sha256": "c018b218b26a9677f5c98d95a923afa784feac45351bf8e42c3e6b6dc0a0b4a7"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F96_seed0_per_variable.png",
+    "bytes": 112082,
+    "sha256": "e9dbbabfd85e6a45692eb81ab5d043e4f8f03566eceb82e9968e7d7c0c92ad2c"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_air_multivariate_F96_seed0_training.png",
+    "bytes": 82869,
+    "sha256": "199cfe0d634300fc759cd6a63ee02a6706e03d1f004b5dc4b1eb9c30b1dc328a"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F30_seed0_comparison.png",
+    "bytes": 65531,
+    "sha256": "feb6e5d9003d1d00611b50120542b279024d09cd66c48ee7701ac432638468df"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F30_seed0_forecasts_1.png",
+    "bytes": 258674,
+    "sha256": "f4ae95f1775ca9d067b099bcd16820c351bf8c147fd0af15b1081f4665fcf442"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F30_seed0_forecasts_2.png",
+    "bytes": 244512,
+    "sha256": "19cd52c503c10844cdde88ceb7ab069d30148cda94463ec369f707436a937310"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F30_seed0_forecasts_3.png",
+    "bytes": 274322,
+    "sha256": "30e9788216ed2c17a2bd7a4cc7eabfa781a1b0e3becc04393e13a7394640da72"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F30_seed0_horizon_errors.png",
+    "bytes": 113809,
+    "sha256": "b09d2f53ca2f57bc7a1cba57e2bc9dc2bb0c479393158b782d4ae10b7fd2eaed"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F30_seed0_per_variable.png",
+    "bytes": 141900,
+    "sha256": "208f91bc67782152d068c1217d8055069da476e7f975e644f52e54a75af33246"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F30_seed0_training.png",
+    "bytes": 81832,
+    "sha256": "60ae62ce3b99f522fed1c288554bf6e0061f382efceb18be8ce8a23bfd0e7c69"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F7_seed0_comparison.png",
+    "bytes": 64169,
+    "sha256": "ee27c05e4ca6bf2373ef075f6d9a98659727b3abb06d246babdee6b7f17bab68"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F7_seed0_forecasts_1.png",
+    "bytes": 223569,
+    "sha256": "0a03cdaaf800b238bd9dbcdd671f24a6312f352fc5de51f40934871da36c85e2"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F7_seed0_forecasts_2.png",
+    "bytes": 216076,
+    "sha256": "6921a016e7001c4a173040f030478d8aebe06780185807f7d8389a864edb62f0"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F7_seed0_forecasts_3.png",
+    "bytes": 239549,
+    "sha256": "be2caec51288f2e591366e49ee3a0f480c54911e77f3fe4771302c47df127616"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F7_seed0_horizon_errors.png",
+    "bytes": 98918,
+    "sha256": "5bb81715e6f9d3f206a70213fc112a1390c82c808a942e4756a887d5d3070534"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F7_seed0_per_variable.png",
+    "bytes": 139192,
+    "sha256": "229cd7301b92ffa154ffc69a100c0013f4bb83ed380df78fedb1a1120d6f437d"
+  },
+  {
+    "path": "figures/india/timekan/Delhi_climate_multivariate_F7_seed0_training.png",
+    "bytes": 78710,
+    "sha256": "b1ee7da5e3b131954c903691bb9dd3972913227fa8d412e8bf1f5baf869cadb2"
+  },
+  {
+    "path": "indian_learned_baselines.R",
+    "bytes": 19902,
+    "sha256": "9b02d3c68a7e74604ac48b7328a06c37faf5f6fc245aa73b97a15371103cf098"
+  },
+  {
+    "path": "INDIAN_RESULTS.md",
+    "bytes": 4184,
+    "sha256": "d72b1f1fb6e388e08fd159281801506533c1a332401a678c9f34f7429ac9e6b8"
+  },
+  {
+    "path": "results/india/learned_baselines/all_models.csv",
+    "bytes": 1934,
+    "sha256": "eda94a01c70fc9ef171409b4229adb7f85e33f5ac325a4bd9b57060a141c94bc"
+  },
+  {
+    "path": "results/india/learned_baselines/all_models_by_horizon.csv",
+    "bytes": 68646,
+    "sha256": "01ccc22227c7c19e82ecaa517332ffc356299dff36ea2b8a79226d78056a53b3"
+  },
+  {
+    "path": "results/india/learned_baselines/all_models_per_variable.csv",
+    "bytes": 32478,
+    "sha256": "655203eff9e3e6ebe01739d3051c6835b7013ab1d5885e104dff4838aa48dfaf"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F24_seed0_DLinear_by_horizon.csv",
+    "bytes": 3779,
+    "sha256": "be8f78da7e7bc9954d538589cbaa4977cd8f7415e2a900e4514a1b27fba0b848"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F24_seed0_DLinear_complete.rds",
+    "bytes": 10827,
+    "sha256": "52b057d7a51c448142149a45f2796b3a3ab249612282c2aada1cc207c8fc73e7"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F24_seed0_DLinear_overall.csv",
+    "bytes": 237,
+    "sha256": "decb1ceb65a2c65c93657bd54577dfbed4a66b01a2396b6c788eb8e711b685ce"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F24_seed0_DLinear_per_variable.csv",
+    "bytes": 3564,
+    "sha256": "b26ef2659fc870ececddbb884d1433eec6eb6acca344d46997bc722814e536df"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F24_seed0_DLinear_training.csv",
+    "bytes": 409,
+    "sha256": "524606f949470e7f1efa684079b4fe72480fec35e79f328ed6bca2ae2caf001c"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F24_seed0_iTransformer_by_horizon.csv",
+    "bytes": 3903,
+    "sha256": "4140b8a330ea39d4ca6b310251c0895e27d62c661ddf235dcea39679b320b599"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F24_seed0_iTransformer_complete.rds",
+    "bytes": 10805,
+    "sha256": "2e74e5792266d54999e6b2c490865c65b35105cf1e0b884e79d3ce764fa3720f"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F24_seed0_iTransformer_overall.csv",
+    "bytes": 242,
+    "sha256": "b1065a8c1562be6387a0300191d2a5dccbe7798d9a2a52a549b6ae9857553b7e"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F24_seed0_iTransformer_per_variable.csv",
+    "bytes": 3628,
+    "sha256": "14356fb3c14815cc99603e917ff91dee9a6e6ad35713ab54b7857173c93210f9"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F24_seed0_iTransformer_training.csv",
+    "bytes": 332,
+    "sha256": "60b71a666c522962b90bf7907a1ddd4437ef34fbc7fb45246fc8c282408bd022"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F96_seed0_DLinear_by_horizon.csv",
+    "bytes": 14999,
+    "sha256": "1c5fdcdc69a505e3a295c0b878913159f7194a19d50fc6651f6728ebddbdf03f"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F96_seed0_DLinear_complete.rds",
+    "bytes": 23459,
+    "sha256": "51abd340c2fc96b911083d8b6754a0c1be2d2e5b6db90acec6a485ee92eaa717"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F96_seed0_DLinear_overall.csv",
+    "bytes": 237,
+    "sha256": "6ec02f4a2949fa170e11cea2257a01f3fd19c6f57408a502ecb4ae6c1a0708fe"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F96_seed0_DLinear_per_variable.csv",
+    "bytes": 3596,
+    "sha256": "acdd531a3bda25cee1cee95d30a5b858e3f9a5da3cad6134737cb1629a2f1e15"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F96_seed0_DLinear_training.csv",
+    "bytes": 411,
+    "sha256": "9b63428e1bb664a6690b7ddfa7acb7a7c80ad1e664b823d41d2968971aaa10f9"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F96_seed0_iTransformer_by_horizon.csv",
+    "bytes": 15470,
+    "sha256": "dda4cab4e76e6016cd3927976958c0ff1ef1611da5456f8ed3beb78d95137172"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F96_seed0_iTransformer_complete.rds",
+    "bytes": 23417,
+    "sha256": "390e39320427bab4562d14fb06558d4d29039321b68aa3a609e3abb052aa540f"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F96_seed0_iTransformer_overall.csv",
+    "bytes": 242,
+    "sha256": "a9f5fec43b5893dc19066363c912d39d9bd4db27f1b90a9a157ee54b24c6ff54"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F96_seed0_iTransformer_per_variable.csv",
+    "bytes": 3654,
+    "sha256": "47d269ecbda3fe38669923ec052f214dbfb4e5e049d08d0835306fccb84581b4"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F96_seed0_iTransformer_training.csv",
+    "bytes": 258,
+    "sha256": "ebe729da6a777fefe1a86c38ad7f4b6b22f8d878841e5259e436b1d3d93f72cf"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_DLinear_by_horizon.csv",
+    "bytes": 4677,
+    "sha256": "36eabca6a99b83b28544f28ca0e43d164dfe0b685adf4d1e80f871b04071dbfa"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_DLinear_complete.rds",
+    "bytes": 10297,
+    "sha256": "c0f17dbe19f75b29cbbce035655d7585208e3f4bf72df8bd6ed40aed41ca650c"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_DLinear_overall.csv",
+    "bytes": 232,
+    "sha256": "94ed0cf7f8e1f57e6e938b3e7f7f96236214413b6aeb410e77321c75c70f657d"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_DLinear_per_variable.csv",
+    "bytes": 3748,
+    "sha256": "45babb9c0d4c32dc124054212715b2da4b16c9360e4e18354935792fb1e27cf4"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_DLinear_training.csv",
+    "bytes": 406,
+    "sha256": "b1d32aeefb30dd0805a4e154f5e472e8b6eab05628edc35b0321d975a1373b16"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_iTransformer_by_horizon.csv",
+    "bytes": 4825,
+    "sha256": "76fabfffd7b0f460b9febc39454287fc5a4c53aee6aebf7ee8cd7ba7d89aefcc"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_iTransformer_complete.rds",
+    "bytes": 10248,
+    "sha256": "1626d5f561952a6fc62d56f1a155aa7a09fcfc35830f83198a0559a1d15a8e71"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_iTransformer_overall.csv",
+    "bytes": 237,
+    "sha256": "71b5b4e496fb358530575a57e3805a714cb194b8a7c17854103367b94bc819b4"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_iTransformer_per_variable.csv",
+    "bytes": 3814,
+    "sha256": "0a101174b118e463944ab72167f33230c175da5a11d960c127ef58e1d8045914"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_iTransformer_training.csv",
+    "bytes": 256,
+    "sha256": "aeeb5cfb5b4b20683b131c9aa611a2682bb432d771a7d6adbdfb0a0a7ccb139e"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_DLinear_by_horizon.csv",
+    "bytes": 1125,
+    "sha256": "a338c3c845c6e2830a33b8fdc245685ce25807a02f0b49bb4465a7c0a4633fef"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_DLinear_complete.rds",
+    "bytes": 6493,
+    "sha256": "90d4b2c0f85ce10eb5f7dea85c055f5ea79e3d9ed73447d0a60f1a9bcb52e5f1"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_DLinear_overall.csv",
+    "bytes": 231,
+    "sha256": "3cd0c0b84af563b7885ef5461040c001738dd48ac4839ce092f51bdac4300349"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_DLinear_per_variable.csv",
+    "bytes": 3707,
+    "sha256": "519d5f2950e44bf436ab235d40b710c495b139eb7838b0a71365d1adc3a97827"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_DLinear_training.csv",
+    "bytes": 408,
+    "sha256": "b80a2aad1c7d74668a2f7073022e5e728c4449fac9fa300554cf441b3bb81974"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_iTransformer_by_horizon.csv",
+    "bytes": 1161,
+    "sha256": "e9e56df90c7b522d3b9cd6756b46927d59454a4a6e62df292e5cfb586acaa424"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_iTransformer_complete.rds",
+    "bytes": 6411,
+    "sha256": "7cb9361a3dd4103a8e06bb38c46a1e6ba88d8f2aab2a6eb4bba4fa3aa43bd282"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_iTransformer_overall.csv",
+    "bytes": 236,
+    "sha256": "ddb0fe6d2fa5bda1438a61e0697762238c03d827f38771def11c60024aff0982"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_iTransformer_per_variable.csv",
+    "bytes": 3775,
+    "sha256": "ec2c062c37a1533a980c84e74f742c5aa01944a55b15b778e8ebc5db4d7f630d"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_iTransformer_training.csv",
+    "bytes": 219,
+    "sha256": "31bf7c3f076a459bf74e06c00f3f9929956ec1b890439483733154ae005403cf"
+  },
+  {
+    "path": "results/india/learned_baselines/port_checks/DLinear_input_gradient.csv",
+    "bytes": 902,
+    "sha256": "9b2d9da991fad30f754beb934f33612781650c22a9fe492b682441085a81352f"
+  },
+  {
+    "path": "results/india/learned_baselines/port_checks/DLinear_output.csv",
+    "bytes": 444,
+    "sha256": "341c3c949f4221003f0d9c76a115dc1aa1517cee26f52b5c55d1084869076c93"
+  },
+  {
+    "path": "results/india/learned_baselines/port_checks/iTransformer_input_gradient.csv",
+    "bytes": 976,
+    "sha256": "dfb13e23c5313876590e45208c0ae683bd8edde62932101d3faf038532374162"
+  },
+  {
+    "path": "results/india/learned_baselines/port_checks/iTransformer_output.csv",
+    "bytes": 429,
+    "sha256": "7c63a778c4f26fb998146bd7cdae3f9910c8e1053abb24c5c11d16f07130ffd8"
+  },
+  {
+    "path": "results/india/learned_baselines/port_checks/official_parity_report.json",
+    "bytes": 469,
+    "sha256": "dbf95e59f8bd0e314b926a235201e05033f7f82cbc99c5ae6ece5833e4d46239"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F24_seed0_by_horizon.csv",
+    "bytes": 3782,
+    "sha256": "b7a8b2492bbdbfb8b442cfd5926a5cdabb4fe920c529d3c525b4012c0e57b2a5"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F24_seed0_complete.rds",
+    "bytes": 10818,
+    "sha256": "528f5883e2dbd71afb2e1c680b80d348085910dd24ee79a478de8391e7bd39be"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F24_seed0_dropped_variables.csv",
+    "bytes": 37,
+    "sha256": "d1849cc5c7f1440d34f040c25392ed0a47a17827283eabfdcb2df7254bbef001"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F24_seed0_overall.csv",
+    "bytes": 237,
+    "sha256": "3d710be65cab69c14aa66e609d8529d07a144c04e719a33c6e43cdab0a4951c2"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F24_seed0_per_variable.csv",
+    "bytes": 3570,
+    "sha256": "7e7af700d0e2691be0ecd214dd3c0c2b1c2e0ade20e3260761beb9cc6de811f6"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F24_seed0_training.csv",
+    "bytes": 370,
+    "sha256": "9852ecb1cdb8f9bb006cf0aefddbc6b3dcb37965e2dfbf17cf5e9a92d7872e21"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F96_seed0_by_horizon.csv",
+    "bytes": 15009,
+    "sha256": "e1e261a28d072ceb9d060b29ab6096ed7ea9281ffdf43b7fb1088629e651631b"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F96_seed0_complete.rds",
+    "bytes": 23435,
+    "sha256": "046482ecff602a2fdb1db9ca0baaa4ea5ee8f100c28fa56aac9277573177f932"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F96_seed0_dropped_variables.csv",
+    "bytes": 37,
+    "sha256": "d1849cc5c7f1440d34f040c25392ed0a47a17827283eabfdcb2df7254bbef001"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F96_seed0_overall.csv",
+    "bytes": 237,
+    "sha256": "0eab45792fe2c843ecd5647cbda5c03195b286ad0b1bfcbecd9c5e22d25a18c7"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F96_seed0_per_variable.csv",
+    "bytes": 3593,
+    "sha256": "be3f97c71a731de34687568d0083b7acc469bd465a4032ebdd7d88a7d9a6c0a9"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F96_seed0_training.csv",
+    "bytes": 370,
+    "sha256": "da583e1070c41639451c7669238451a360c96fcef793a1b4cdb502bb201053e1"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F30_seed0_by_horizon.csv",
+    "bytes": 4676,
+    "sha256": "f36feb12feda2eedb8b05a51a1138f8b0a39341348a1e00dcf43d6535ce3e8e0"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F30_seed0_complete.rds",
+    "bytes": 10286,
+    "sha256": "598a519e46bd7068ad7c19b162d11916b55f8a68fc3c2ba7462bdc2687e80d3f"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F30_seed0_dropped_variables.csv",
+    "bytes": 37,
+    "sha256": "d1849cc5c7f1440d34f040c25392ed0a47a17827283eabfdcb2df7254bbef001"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F30_seed0_overall.csv",
+    "bytes": 231,
+    "sha256": "5161949c2d3877039f83be16bb737f0ce5a23f7bc1663d4b00d76421e6c73d12"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F30_seed0_per_variable.csv",
+    "bytes": 3746,
+    "sha256": "89b2d28e07cb5a374a27ae8dd422089a68fc42baaa12a109bb3a789e9ee34e63"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F30_seed0_training.csv",
+    "bytes": 408,
+    "sha256": "48c14e101254722a52f1ffb099d1871bc05b0fd1b0cb7d343a5e32c1e09c4a31"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F7_seed0_by_horizon.csv",
+    "bytes": 1126,
+    "sha256": "173aa2602e8df41484e3a4c40abe50a66486d1a91e9ca1f52bbf320462cb17e9"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F7_seed0_complete.rds",
+    "bytes": 6489,
+    "sha256": "bfbb3b929330775143181ec1c6ba60c239e40553d4acee04d5a2cdf6a0614d46"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F7_seed0_dropped_variables.csv",
+    "bytes": 37,
+    "sha256": "d1849cc5c7f1440d34f040c25392ed0a47a17827283eabfdcb2df7254bbef001"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F7_seed0_overall.csv",
+    "bytes": 230,
+    "sha256": "ebd78868ff7b2833dea11e4f8575c722ee21ce19b0269aea4723d68572432fb3"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F7_seed0_per_variable.csv",
+    "bytes": 3714,
+    "sha256": "f288255ce965eb08b9a41855fb0f8d2967cb12b5147bf2387f0e40e9fc0fc9d0"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F7_seed0_training.csv",
+    "bytes": 407,
+    "sha256": "257820dd2c19a16b1a013f8bcf6efa8f0ed8dca16be8ff2573f7c0a2db06cf22"
+  },
+  {
+    "path": "results/india/timekan/multivariate_summary.csv",
+    "bytes": 1242,
+    "sha256": "8fdadf73997212a5a9fe944994cf5aaa47c2fe06c1e15fc855efdfa7739aa067"
+  },
+  {
+    "path": "results/india/timekan/provenance/Delhi_air_multivariate_F24_seed0_provenance.R",
+    "bytes": 2224,
+    "sha256": "a7078aa50eb593c9f53a685a441278869b87111d4ae90582f01a29f3e341a699"
+  },
+  {
+    "path": "results/india/timekan/provenance/Delhi_air_multivariate_F96_seed0_provenance.R",
+    "bytes": 2225,
+    "sha256": "96d049eeefce3ce37c3eb4a719744e49901e1eca73c279a3cf4fe7a444707233"
+  },
+  {
+    "path": "results/india/timekan/provenance/Delhi_climate_multivariate_F30_seed0_provenance.R",
+    "bytes": 2942,
+    "sha256": "65c88b64a94dbb7bd8c9d458fcb29db21023a668228ecaf24715fb7239775d4d"
+  },
+  {
+    "path": "results/india/timekan/provenance/Delhi_climate_multivariate_F7_seed0_provenance.R",
+    "bytes": 2940,
+    "sha256": "71cd82c29ee8785d906d532270840a035fd800012fac3348a4a7327fbbb08522"
+  },
+  {
+    "path": "run_india_multivariate.R",
+    "bytes": 26516,
+    "sha256": "eddd3c099310144d0253951a3a54f52e8eedb2556f22567b72649739955d3116"
+  },
+  {
+    "path": "tests/india/check_baseline_ports.py",
+    "bytes": 4332,
+    "sha256": "e80ead1785fe81bc10b1594688353281fd2b14f1b3fc1d75e15dbb79f982a6db"
+  },
+  {
+    "path": "third_party/india_baselines/baseline_official_sources.json",
+    "bytes": 30920,
+    "sha256": "3f325f38f1af5ebf3d3cf404caa8b9d7c9d1e22ca3d3035c4b1312874056cab8"
+  },
+  {
+    "path": "third_party/india_baselines/baseline_reference_manifest.json",
+    "bytes": 1184,
+    "sha256": "e17a4c29c8d029ef6de66a89b747b7a50e68b9edb9de171d10ad1f2882d8b52c"
+  },
+  {
+    "path": "third_party/india_baselines/LICENSE_DLinear.txt",
+    "bytes": 11400,
+    "sha256": "7d0d8193e78eef828028dd99e7e0104fe4e858be03f94b90d84b20e2d0416708"
+  },
+  {
+    "path": "third_party/india_baselines/LICENSE_iTransformer.txt",
+    "bytes": 1084,
+    "sha256": "29d2a4c09fa577780522219dc248466977f77cd420354c5e9a0e86550be2b849"
+  }
+]

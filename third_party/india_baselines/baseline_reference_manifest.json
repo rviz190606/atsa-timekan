@@ -1,0 +1,32 @@
+[
+  {
+    "repository": "cure-lab/LTSF-Linear",
+    "path": "models/DLinear.py",
+    "git_blob_sha": "1cf739ab3de99497d0225610153a05c52609c760",
+    "url": "https://github.com/cure-lab/LTSF-Linear/blob/main/models/DLinear.py"
+  },
+  {
+    "repository": "thuml/iTransformer",
+    "path": "model/iTransformer.py",
+    "git_blob_sha": "a6627bf1cadd7ffb58cf10506547aa3a615c1010",
+    "url": "https://github.com/thuml/iTransformer/blob/main/model/iTransformer.py"
+  },
+  {
+    "repository": "thuml/iTransformer",
+    "path": "layers/Transformer_EncDec.py",
+    "git_blob_sha": "c48ddc3f57c8e98d50695a903a946b91c3255e0c",
+    "url": "https://github.com/thuml/iTransformer/blob/main/layers/Transformer_EncDec.py"
+  },
+  {
+    "repository": "thuml/iTransformer",
+    "path": "layers/SelfAttention_Family.py",
+    "git_blob_sha": "99b1b2a2fd18a144fefd7065cdfd6d2f29c3db79",
+    "url": "https://github.com/thuml/iTransformer/blob/main/layers/SelfAttention_Family.py"
+  },
+  {
+    "repository": "thuml/iTransformer",
+    "path": "layers/Embed.py",
+    "git_blob_sha": "33fae23262246611511a6a0d6c726af86c381a80",
+    "url": "https://github.com/thuml/iTransformer/blob/main/layers/Embed.py"
+  }
+]

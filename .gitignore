@@ -20,3 +20,8 @@ run_order.log
 # Keep experiment results (data CSVs above stay ignored)
 !results/*.csv
 run_basis.log
+
+# Published Indian experiment tables and compact metric/configuration records.
+# Dataset CSVs and neural model weights remain ignored elsewhere.
+!results/india/**/*.csv
+!results/india/**/*_complete.rds

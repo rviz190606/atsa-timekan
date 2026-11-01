@@ -2,6 +2,16 @@
 
 A minimal R implementation (using the [`torch`](https://torch.mlverse.org/) package) of **TimeKAN: KAN-based Frequency Decomposition Learning Architecture for Long-term Time Series Forecasting** (Huang et al., ICLR 2025, [arXiv:2502.06910](https://arxiv.org/abs/2502.06910)).
 
+## Indian dataset experiments
+
+New multivariate comparisons on Delhi air quality and Delhi weather cover
+TimeKAN, DLinear, iTransformer, persistence and seasonal-naive forecasting.
+
+**[Read the results and reproduce the experiments](INDIAN_RESULTS.md)** —
+four forecast cases, 12 variables per dataset, complete MSE/MAE tables and
+58 plots. The [five-method overview](figures/india/learned_baselines/learned_baseline_comparison.png)
+compares the models under identical data splits and target masks.
+
 ## How it works
 
 TimeKAN splits a time series into frequency bands, learns each band separately, then recombines them:

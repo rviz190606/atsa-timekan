@@ -1,0 +1,13 @@
+"experiment","variables","model","mse_standardized","mae_standardized","observed_targets"
+"Delhi_air_multivariate_F24_seed0",12,"TimeKAN",0.262905788873457,0.323312310326044,1002528
+"Delhi_air_multivariate_F24_seed0",12,"Persistence",0.607489114495417,0.497413053970535,1002528
+"Delhi_air_multivariate_F24_seed0",12,"SeasonalNaive",0.372337730378519,0.380427488495756,1002528
+"Delhi_air_multivariate_F96_seed0",12,"TimeKAN",0.465244170955096,0.434089271000914,3927168
+"Delhi_air_multivariate_F96_seed0",12,"Persistence",0.854530547347656,0.604365320789402,3927168
+"Delhi_air_multivariate_F96_seed0",12,"SeasonalNaive",0.606644956192684,0.491187896869004,3927168
+"Delhi_climate_multivariate_F7_seed0",12,"TimeKAN",0.55121772953424,0.396412167803483,70812
+"Delhi_climate_multivariate_F7_seed0",12,"Persistence",0.889890265924994,0.404481694276307,70812
+"Delhi_climate_multivariate_F7_seed0",12,"SeasonalNaive",0.972026361491102,0.455797187651297,70812
+"Delhi_climate_multivariate_F30_seed0",12,"TimeKAN",0.67000101944674,0.480894017238651,295200
+"Delhi_climate_multivariate_F30_seed0",12,"Persistence",1.06561561749343,0.517035771777329,295200
+"Delhi_climate_multivariate_F30_seed0",12,"SeasonalNaive",1.11773431578816,0.549114245379109,295200
