@@ -1,0 +1,7 @@
+"dataset","pred_len","tag","mean","sd","n"
+"ETTh1",96,"paper",0.3832,0.0078,3
+"ETTh1",96,"exact",0.3859,0.0127,3
+"ETTh1",96,"official",0.3996,0.0074,3
+"ETTh2",96,"paper",0.2999,0.0053,3
+"ETTh2",96,"exact",0.2946,9e-04,3
+"ETTh2",96,"official",0.2937,0.0019,3

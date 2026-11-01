@@ -29,13 +29,26 @@ library(torch)
 # Frequency Upsampling, Eq. (3): IFFT(ZeroPad(FFT(x))).
 # Stretches a short sequence to `target_len` without adding new frequencies.
 # x: [B, L_short, D]  ->  [B, target_len, D]
-frequency_upsample <- function(x, target_len) {
+frequency_upsample <- function(x, target_len, official = FALSE) {
   short_len <- x$size(2)
   spec <- torch_fft_rfft(x, dim = 2)
   # irfft with a larger n zero-pads the high-frequency bins for us.
   out <- torch_fft_irfft(spec, n = target_len, dim = 2)
   # Rescale so amplitudes match (FFT normalisation depends on length).
-  out * (target_len / short_len)
+  # official = TRUE: the authors' code scales by short_len / target_len instead,
+  # which leaves only 1/4 of the amplitude.
+  out * (if (official) short_len / target_len else target_len / short_len)
+}
+
+
+# cfd_mode "exact": downsample by keeping only the FFT bins the shorter sequence can hold
+# (an ideal low-pass), so each band f_i really is one frequency band.
+# x: [B, 1, L]  ->  [B, 1, L / window]
+fft_lowpass_pool <- function(x, window) {
+  len <- x$size(3)
+  out_len <- len %/% window
+  spec <- torch_fft_rfft(x, dim = 3)[, , 1:(out_len %/% 2 + 1)]
+  torch_fft_irfft(spec, n = out_len, dim = 3) * (out_len / len)
 }
 
 
@@ -139,7 +152,8 @@ band_orders <- function(k, base_order, fixed_order = 0, order_mode = "paper") {
 timekan_layer <- nn_module(
   "TimeKANLayer",
   initialize = function(dim, num_levels, base_order, fixed_order = 0, order_mode = "paper",
-                        basis = "chebyshev") {
+                        basis = "chebyshev", cfd_mode = "paper") {
+    self$official <- cfd_mode == "official"
     self$orders <- band_orders(num_levels, base_order, fixed_order, order_mode)
     self$mkans <- nn_module_list(lapply(self$orders, function(o) mkan(dim, o, basis = basis)))
   },
@@ -151,7 +165,7 @@ timekan_layer <- nn_module(
     k <- length(xs)
     fs <- vector("list", k)
     for (i in seq_len(k - 1)) {
-      fs[[i]] <- xs[[i]] - frequency_upsample(xs[[i + 1]], xs[[i]]$size(2))
+      fs[[i]] <- xs[[i]] - frequency_upsample(xs[[i + 1]], xs[[i]]$size(2), self$official)
     }
     fs[[k]] <- xs[[k]]
     fs
@@ -169,7 +183,7 @@ timekan_layer <- nn_module(
     out <- vector("list", k)
     out[[k]] <- fs[[k]]
     for (i in rev(seq_len(k - 1))) {
-      out[[i]] <- frequency_upsample(out[[i + 1]], fs[[i]]$size(2)) + fs[[i]]
+      out[[i]] <- frequency_upsample(out[[i + 1]], fs[[i]]$size(2), self$official) + fs[[i]]
     }
     out
   }
@@ -184,16 +198,19 @@ timekan <- nn_module(
   "TimeKAN",
   initialize = function(seq_len, pred_len, d_model = 16, num_levels = 3, window = 2,
                         num_layers = 2, base_order = 1, fixed_order = 0,
-                        order_mode = "paper", basis = "chebyshev") {
+                        order_mode = "paper", basis = "chebyshev", cfd_mode = "paper") {
     stopifnot("seq_len must be divisible by window^(levels - 1)" =
                 seq_len %% (window^(num_levels - 1)) == 0)
+    stopifnot(cfd_mode %in% c("paper", "exact", "official"))
     self$num_levels <- num_levels
+    self$window <- window
+    self$cfd_mode <- cfd_mode
     # Moving average used to remove high frequencies, Eq. (1).
     self$pool <- nn_avg_pool1d(window, stride = window)
     # Embed each scalar time step into D dims, Eq. (2) (one Linear per level).
     self$embeds <- nn_module_list(lapply(1:num_levels, function(i) nn_linear(1, d_model)))
     self$layers <- nn_module_list(lapply(1:num_layers, function(i)
-      timekan_layer(d_model, num_levels, base_order, fixed_order, order_mode, basis)))
+      timekan_layer(d_model, num_levels, base_order, fixed_order, order_mode, basis, cfd_mode)))
     # Forecast head, Eq. (12): project D -> 1, then time T -> F.
     self$proj_dim <- nn_linear(d_model, 1)
     self$proj_time <- nn_linear(seq_len, pred_len)
@@ -216,7 +233,8 @@ timekan <- nn_module(
     # Lengths T, T/d, T/d^2, ...; each level is a smoother copy of the one before.
     levels <- list(x)
     for (i in seq_len(self$num_levels - 1)) {
-      levels[[i + 1]] <- self$pool(levels[[i]])
+      levels[[i + 1]] <- if (self$cfd_mode == "exact") fft_lowpass_pool(levels[[i]], self$window)
+                         else self$pool(levels[[i]])
     }
     xs <- lapply(seq_along(levels), function(i)
       self$embeds[[i]](levels[[i]]$transpose(2, 3)))         # each [B*N, L_i, D]
@@ -358,6 +376,7 @@ default_options <- list(
   fixed_order = 0,       # if > 0, use this KAN order at every level (ablation)
   order_mode = "paper",  # "paper" (high freq -> high order) or "reversed" (see band_orders)
   basis = "chebyshev",   # KAN function family: chebyshev, legendre, fourier, rbf, linear
+  cfd_mode = "paper",    # "paper", "exact" (ideal FFT band split) or "official" (authors' 1/4 scale)
   epochs = 10,
   patience = 3,          # stop after this many epochs without a better val MSE
   batch_size = 32,
@@ -398,7 +417,7 @@ run_experiment <- function(opt) {
 
   model <- timekan(opt$seq_len, opt$pred_len, opt$d_model, opt$levels,
                    opt$window, opt$layers, opt$base_order, opt$fixed_order,
-                   opt$order_mode, opt$basis)
+                   opt$order_mode, opt$basis, opt$cfd_mode)
   model$to(device = device)
   n_params <- sum(sapply(model$parameters, function(p) p$numel()))
   cat(sprintf("TimeKAN parameters: %s\n", format(n_params, big.mark = ",")))

@@ -6,6 +6,9 @@
 # Part C (basis swap): summarises results/basis.csv from run_basis_experiment.sh.
 #   figures/basis_results.png, results/basis_summary.csv
 #
+# Part D (band split): summarises results/cfd.csv from run_cfd_experiment.sh.
+#   figures/cfd_results.png, results/cfd_summary.csv
+#
 # Part B (looking inside the KANs): uses the "fixed3" models, where EVERY band has an
 # order-3 KAN, so each band is free to learn curved or nearly-straight functions.
 # If the paper's intuition is right, the high-frequency band should use more curvature.
@@ -106,6 +109,21 @@ if (file.exists("results/basis.csv") && file.exists("results/orders.csv")) {
   rb <- rbind(cheb_runs[, cols], read.csv("results/basis.csv")[, cols])
   compare_variants(rb, BASES, "chebyshev", "KAN basis functions",
                    "figures/basis_results.png", "results/basis_summary.csv")
+}
+
+
+# ---------------------------------------------------------------------------
+# Part D: band split (moving average vs. exact FFT split vs. authors' scaling)
+# ---------------------------------------------------------------------------
+# Baseline = the "paper" runs of the order experiment (same settings and seeds).
+SPLITS <- c(paper = "Paper (moving average)", exact = "Exact FFT split", official = "Official 1/4 scale")
+
+if (file.exists("results/cfd.csv") && file.exists("results/orders.csv")) {
+  cols <- c("dataset", "pred_len", "tag", "test_mse")
+  base <- read.csv("results/orders.csv")
+  base <- base[base$tag == "paper" & base$pred_len == 96, ]
+  compare_variants(rbind(base[, cols], read.csv("results/cfd.csv")[, cols]), SPLITS, "paper",
+                   "How the series is split into bands", "figures/cfd_results.png", "results/cfd_summary.csv")
 }
 
 
