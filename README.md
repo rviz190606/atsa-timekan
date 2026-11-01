@@ -14,6 +14,12 @@ compares the models under identical data splits and target masks.
 
 ## How it works
 
+The new [layer-depth experiment](docs/DEPTH_EXPERIMENT.md) sweeps
+L = 1, 2, 3, 4, 5, 10, 20 on ETTh1, ETTh2 and ETTm1 with one seed.
+Run `Rscript run_depth_experiment.R --device cuda`; it produces consolidated
+MSE/MAE tables and two accuracy/convergence figures. See the protocol for training
+limits and interpretation; implementation alone does not imply completed results.
+
 TimeKAN splits a time series into frequency bands, learns each band separately, then recombines them:
 
 1. **Hierarchical preprocessing**: moving averages build progressively smoother copies of the input, and each copy is embedded into `d_model` dimensions.

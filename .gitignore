@@ -36,3 +36,12 @@ figures/india/**/*.png
 !figures/india/learned_baselines/Delhi_climate_multivariate_F30_forecast_comparison_1.png
 !figures/india/learned_baselines/Delhi_climate_multivariate_F7_forecast_comparison_1.png
 !figures/india/learned_baselines/learned_baseline_comparison.png
+
+# Depth study: two consolidated tables and two figures; keep detailed records local/Drive.
+!results/depth/summary.csv
+!results/depth/learning_curves.csv
+results/depth/failures.txt
+results/depth_benchmark/
+results/depth_jobs/
+TimeKAN_depth_results.zip
+__pycache__/
