@@ -1,121 +1,126 @@
 # TimeKAN
 
-An enhanced, high-performance R implementation (using the [`torch`](https://torch.mlverse.org/) package) of **TimeKAN: KAN-based Frequency Decomposition Learning Architecture for Long-term Time Series Forecasting** (Huang et al., ICLR 2025, [arXiv:2502.06910](https://arxiv.org/abs/2502.06910)).
+A minimal R implementation (using the [`torch`](https://torch.mlverse.org/) package) of **TimeKAN: KAN-based Frequency Decomposition Learning Architecture for Long-term Time Series Forecasting** (Huang et al., ICLR 2025, [arXiv:2502.06910](https://arxiv.org/abs/2502.06910)).
 
-This version includes architectural extensions and extensive CPU-oriented performance optimizations designed specifically for fast, accurate training on single PCs without GPUs.
+## Indian dataset experiments
 
----
+New multivariate comparisons on Delhi air quality and Delhi weather cover
+TimeKAN, DLinear, iTransformer, persistence and seasonal-naive forecasting.
 
-## Architecture Overview
+**[Read the results and reproduce the experiments](INDIAN_RESULTS.md)** â€”
+four forecast cases, 12 variables per dataset, complete MSE/MAE tables and
+five selected plots. The [five-method overview](figures/india/learned_baselines/learned_baseline_comparison.png)
+compares the models under identical data splits and target masks.
 
-TimeKAN decomposes multi-frequency time series into distinct frequency bands, models temporal dependencies and nonlinear representations separately for each band, and recombines them hierarchically:
+## How it works
 
-1. **Hierarchical Preprocessing**: Moving averages progressively smooth the input sequence into $k$ levels ($x_1, \dots, x_k$), each embedded into $D$ hidden dimensions.
-2. **Cascaded Frequency Decomposition (CFD)**: Band residuals are extracted bottom-up: $f_i = x_i - \text{FreqUp}(x_{i+1})$, where $\text{FreqUp}$ upsamples via $\text{IFFT}(\text{ZeroPad}(\text{FFT}(x)))$.
-3. **Multi-order KAN Representation Learning (M-KAN)**: Each band $f_i$ is processed by two parallel branches:
-   - Temporal Branch: Depthwise 1D Convolution along the time dimension.
-   - Channel Branch: Multi-order Chebyshev KAN along channel dimensions with order $b + k - i$.
-4. **Frequency Mixing**: Bands are recombined bottom-up: $x_i = \text{FreqUp}(x_{i+1}) + \hat{f}_i$.
-5. **Prediction**: Stacked across $L$ layers; a linear forecasting head projects $x_1$ into future horizon $F$.
+TimeKAN splits a time series into frequency bands, learns each band separately, then recombines them:
 
----
+1. **Hierarchical preprocessing**: moving averages build progressively smoother copies of the input, and each copy is embedded into `d_model` dimensions.
+2. **Cascaded Frequency Decomposition**: each band is `f_i = x_i âˆ’ FreqUp(x_{i+1})`, where `FreqUp` upsamples with FFT â†’ zero-pad â†’ inverse FFT.
+3. **Multi-order KAN learning**: each band goes through a depthwise conv plus a Chebyshev KAN. Higher-frequency bands get a higher polynomial order.
+4. **Frequency Mixing**: bands are added back together from the lowest up, `x_i = FreqUp(x_{i+1}) + fÌ‚_i`.
 
-## Extensions Implemented
-
-### 1. Learnable M-KAN Branch Fusion (`--mkan_fusion`)
-Instead of fixed addition $\hat{f}_i = f_{i, 1} + f_{i, 2}$, the outputs of the Depthwise Conv and Chebyshev KAN branches are adaptively balanced via learnable scalars:
-- **`learnable` (default)**: Independent learnable scalars $\alpha$ and $\beta$:
-  $$\hat{f}_i = \alpha f_{i, 1} + \beta f_{i, 2}$$
-  Initialized to $\alpha = 0.5, \beta = 0.5$ for balanced starting dynamics.
-- **`convex`**: Normalized convex combination bounded in $(0, 1)$ via sigmoid gating:
-  $$\alpha = \sigma(w_\alpha), \quad \hat{f}_i = \alpha f_{i, 1} + (1 - \alpha) f_{i, 2}$$
-  Initialized to $w_\alpha = 0 \implies \alpha = 0.5$.
-- **`add`**: Fixed direct sum $f_{i, 1} + f_{i, 2}$ as in the vanilla paper.
-
-### 2. Chebyshev Polynomial Complexity Regularization (`--poly_reg`, `--poly_power`)
-Chebyshev polynomials of order $k$ oscillate with increasing frequency $T_k(x) = \cos(k \arccos x)$. Higher-order polynomials are susceptible to overfitting and boundary oscillation (Runge phenomenon). We add an order-dependent penalty to the loss:
-$$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{MSE}} + \lambda_{\text{poly}} \sum_{l=1}^L \sum_{i=1}^k \sum_{d=0}^{\text{order}} d^p \|\Theta_{:, :, d}\|_2^2$$
-- Penalty is zero for degree 0 (constant DC component).
-- Penalty scales with $d^p$ (default $p = 1$ linear, or $p = 2$ quadratic), discouraging unwarranted polynomial complexity.
-
-### 3. High-Dimensional PCA Acceleration with Inverse PCA Reconstruction (`--pca_dim`, `--pca_var`)
-TimeKAN forecasts variables independently ($B \times N$). For datasets with hundreds of variables (e.g., `electricity.csv` with 321 sensors), vanilla training processes thousands of sequences per batch, causing severe CPU slowdowns.
-- **PCA Decomposition**: PCA is fitted strictly on the training set (preventing data leakage). The time series is projected into $K_{\text{pca}} \ll N$ orthogonal principal components:
-  $$Z = (X_{\text{norm}}) W, \quad W \in \mathbb{R}^{N \times K_{\text{pca}}}$$
-- **Fast Latent Training**: TimeKAN is trained on $Z$ (e.g. 16 channels instead of 321), speeding up training by **10x–20x** while capturing cross-variable correlations.
-- **Inverse PCA Transform**: Future forecasts $\hat{Z} \in \mathbb{R}^{B \times F \times K_{\text{pca}}}$ are mapped back to all $N$ original variables via:
-  $$\hat{X}_{\text{orig}} = \hat{Z} W^T \in \mathbb{R}^{B \times F \times N}$$
-- **Full-Variable Evaluation**: Test MSE and MAE are evaluated directly on the reconstructed forecasts against the ground truth of all $N$ original variables.
-
----
-
-## CPU-Efficiency Optimizations (No-GPU Setup)
-
-- **Vectorized GEMM in ChebyKAN**: Replaced PyTorch `einsum` with flattened tensor matrix multiplication (`torch_matmul`), yielding an immediate **~2x speedup** per KAN layer using CPU BLAS/AVX routines.
-- **Multi-Threading**: Automatically detects physical CPU cores and sets `torch_set_num_threads()` to utilize full multi-core parallel performance.
-- **Sliding Window Stride (`--train_stride`)**: For dense long series (e.g., 15-minute sampling in ETTm), training stride allows sampling non-overlapping or lightly overlapping windows, reducing epoch duration by 2x–4x without sacrificing generalization.
-- **Early Stopping (`--patience`)**: Monitors validation MSE and stops automatically when validation loss plateaus, eliminating wasted CPU epochs.
-
----
+Steps 2â€“4 repeat `--layers` times, then a linear head produces the forecast. Each variable is forecast independently.
 
 ## Setup
 
 ```r
-# Install torch and coro in R:
 install.packages("torch")
-install.packages("coro")
-torch::install_torch() # downloads LibTorch CPU binaries on first use
+torch::install_torch()   # downloads libtorch on first use (also prompted automatically)
 ```
 
----
+For an NVIDIA GPU, install the CUDA build instead (a ~3.6 GB download):
+
+```bash
+CUDA=12.8 Rscript -e 'torch::install_torch(reinstall = TRUE)'
+```
+
+If `/tmp` is small (for example an in-memory tmpfs), the unzip can fail. Point `TMPDIR` at a folder on a larger disk first.
+If loading torch then reports `libcudart.so.12: cannot open shared object file`, create that name as a symlink to the bundled
+`libcudart-*.so.12` file in torch's `lib/` folder.
 
 ## Usage
 
 ```bash
-# 1. Train on synthetic multi-frequency series:
-Rscript timekan.R --epochs 5
-
-# 2. Train on ETTh1 benchmark dataset:
-Rscript timekan.R --csv data/ETTh1.csv --epochs 5
-
-# 3. Train on high-dimensional Electricity dataset (321 variables) with PCA:
-# Reduces 321 variables -> 16 principal components (20x training speedup!)
-Rscript timekan.R --csv data/electricity.csv --pca_dim 16 --train_stride 2 --epochs 5
-
-# 4. Automatically select PCA components to retain 90% variance:
-Rscript timekan.R --csv data/weather.csv --pca_var 0.90 --epochs 5
-
-# 5. Experiment with convex M-KAN fusion and polynomial regularization:
-Rscript timekan.R --csv data/ETTh1.csv --mkan_fusion convex --poly_reg 1e-4 --poly_power 2
+Rscript timekan.R                         # train on a synthetic multi-frequency series
+Rscript timekan.R --csv data/ETTh1.csv    # train on a CSV: first column is the date, the rest are variables
+Rscript timekan.R --epochs 5 --levels 4   # override any option below
 ```
 
-You can also `source("timekan.R")` in an R session to import `timekan()` and use it programmatically.
+You can also `source("timekan.R")` in an R session to use the model and data helpers without training.
 
----
+The data split depends on `--split`. `auto`, the default, uses the standard ETT split for files named `ETTh*`/`ETTm*`:
+12/4/4 months for train/val/test, as in the paper. Any other file gets 7:1:2. The script reports test MSE and MAE for the
+checkpoint with the best validation MSE.
 
-## Options & Flags
+## Reproducing the paper (ETT datasets)
 
-| Flag | Default | Description |
+```bash
+mkdir -p data
+for f in ETTh1 ETTh2 ETTm1 ETTm2; do
+  curl -sSL -o data/$f.csv https://raw.githubusercontent.com/zhouhaoyi/ETDataset/main/ETT-small/$f.csv
+done
+./run_experiments.sh   # main results + ablations; about 1 hour on a laptop GPU
+Rscript plots.R        # figures/ and results/comparison.csv (works on partial results too)
+```
+
+- `results/main.csv` holds the paper's Table 1 runs: look-back 96, horizons 96/192/336/720.
+- `results/ablation.csv` holds the number of frequency bands (Table 9) and fixed-order KANs (Table 3), at horizon 96.
+- `results/comparison.csv` puts our MSE/MAE next to the paper's.
+- `figures/` holds the decomposition, an example forecast, results vs. the paper, and the ablations.
+
+## Extension: is "higher order for higher frequency" right?
+
+The paper gives high-frequency bands higher-order KANs, because they supposedly need more complex functions.
+Two experiments test this:
+
+```bash
+./run_order_experiment.sh   # 4 order assignments x ETTh1/ETTh2 x horizons 96/336 x 3 seeds (~45 min)
+./run_basis_experiment.sh   # 4 other basis families, same grid (~45 min; reuses the Chebyshev runs above)
+Rscript extension.R         # figures + summaries
+```
+
+1. **Order assignment.** Four assignments are compared: the paper's (3,2,1), reversed (1,2,3), all 2 (2,2,2), and all 3
+   (3,3,3). The first three have identical parameter counts. Output: `figures/order_results.png` and
+   `results/order_summary.csv`.
+2. **Looking inside the KANs.** This uses the all-order-3 models, where every band has the same capacity. On real test
+   inputs, each band's KAN output is split into a simple part (degrees 0â€“1) and a curved part (degrees â‰¥ 2). The
+   *curvature share* measures how much each band actually uses bends. Output: `figures/kan_nonlinearity.png`,
+   `figures/kan_functions.png` and `results/kan_curvature.csv`.
+3. **Basis swap.** The Chebyshev polynomials are replaced by Legendre polynomials, a Fourier basis, or Gaussian radial
+   basis functions. Each uses the same number of functions per band, so the parameter count is identical. A plain linear
+   layer is the control. Output: `figures/basis_results.png` and `results/basis_summary.csv`.
+
+## Options
+
+| Flag | Default | Meaning |
 |---|---|---|
-| `--csv` | `""` | Path to CSV data file (empty = synthetic multi-frequency series). |
-| `--seq_len` | `96` | Input look-back window length $T$. |
-| `--pred_len` | `96` | Forecast horizon length $F$. |
-| `--d_model` | `16` | Hidden embedding dimension $D$. |
-| `--levels` | `3` | Number of frequency decomposition levels $k$. |
-| `--window` | `2` | Moving-average downsampling factor $d$. |
-| `--layers` | `2` | Number of stacked TimeKAN blocks $L$. |
-| `--base_order` | `1` | Lowest Chebyshev polynomial order $b$. |
-| `--epochs` | `10` | Maximum number of training epochs. |
-| `--batch_size` | `64` | Batch size (optimized for CPU cache and vectorization). |
-| `--lr` | `1e-3` | Adam optimizer learning rate. |
-| `--mkan_fusion` | `"learnable"` | M-KAN branch fusion: `"learnable"` ($\alpha f_1 + \beta f_2$), `"convex"` ($\alpha f_1 + (1-\alpha)f_2$), or `"add"`. |
-| `--poly_reg` | `1e-4` | Chebyshev polynomial complexity regularization coefficient $\lambda_{\text{poly}}$ ($0$ to disable). |
-| `--poly_power` | `1` | Exponent for polynomial order penalty ($1$ for linear $d$, $2$ for quadratic $d^2$). |
-| `--pca_dim` | `0` | Number of PCA components ($0$ to disable). |
-| `--pca_var` | `0.0` | Target explained variance ratio for PCA (e.g. `0.90` for 90%; $0$ to disable). |
-| `--split` | `"auto"` | Split ratio: `"auto"` (6:2:2 for ETT, 7:1:2 for others), `"6:2:2"`, or `"7:1:2"`. |
-| `--train_stride` | `1` | Window stride during training (set $\ge 2$ to speed up large datasets). |
-| `--patience` | `3` | Early stopping patience (stop if no val improvement for $P$ epochs; $0$ to disable). |
-| `--threads` | `0` | PyTorch CPU threads ($0$ = auto-detect all CPU cores). |
+| `--seq_len` | 96 | look-back window T |
+| `--pred_len` | 96 | forecast horizon F |
+| `--d_model` | 16 | embedding dimension D |
+| `--levels` | 3 | number of frequency bands k |
+| `--window` | 2 | moving-average window d |
+| `--layers` | 2 | number of stacked blocks L |
+| `--base_order` | 1 | lowest Chebyshev order b |
+| `--fixed_order` | 0 | if > 0, same KAN order at every level (ablation) |
+| `--order_mode` | paper | `paper` (high frequency â†’ high order) or `reversed` |
+| `--basis` | chebyshev | KAN function family: `chebyshev`, `legendre`, `fourier`, `rbf`, `linear` |
+| `--split` | auto | `auto`, `etth`, `ettm` or `712` |
+| `--epochs` | 10 | maximum training epochs |
+| `--patience` | 3 | early stopping: epochs without a better validation MSE |
+| `--batch_size` | 32 | batch size |
+| `--lr` | 1e-3 | Adam learning rate |
+| `--seed` | 0 | random seed |
+| `--device` | auto | `cuda`, `cpu`, or `auto` (GPU if available) |
+| `--out` | | append a results row to this CSV |
+| `--save` | | save the trained model to this file |
+| `--tag` | | label stored in the results row |
 
-`seq_len` must be divisible by `window^(levels − 1)`.
+`seq_len` must be divisible by `window^(levels âˆ’ 1)`.
+
+## Notes
+
+- RevIN (per-window normalisation) is added on top of the paper's method, as is standard for these models.
+- The default hyperparameters are reasonable choices, not values from the paper. `run_experiments.sh` uses
+  `--lr 0.01 --batch_size 128`, picked from a quick check on ETTh1.

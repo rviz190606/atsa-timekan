@@ -1,0 +1,162 @@
+[
+  {
+    "path": "docs/india/INDIA_MULTIVARIATE.md",
+    "bytes": 7156,
+    "sha256": "ee1856d5089bbc321ec9e3b31365e7c971bce5b41d3e3f5738128b0f53c45674"
+  },
+  {
+    "path": "docs/india/LEARNED_BASELINES.md",
+    "bytes": 8698,
+    "sha256": "b9f0a108c1b5c4320bb4aaf170d74dab79aa27f9e13010373f295410970b44e7"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F24_forecast_comparison_1.png",
+    "bytes": 255910,
+    "sha256": "4d624d61e141d0a9d38f5598288d2c8921039b8206fdc3b2b8b405980d4126d5"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_air_multivariate_F96_forecast_comparison_1.png",
+    "bytes": 358859,
+    "sha256": "54b91431129b586d6749756eac87e2330dffddec9cf6371d4741d5493ff08024"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F30_forecast_comparison_1.png",
+    "bytes": 281978,
+    "sha256": "d2030ff8281279752987154dbdb8b8aa0150224e87ca3ab711f7006a7b816e09"
+  },
+  {
+    "path": "figures/india/learned_baselines/Delhi_climate_multivariate_F7_forecast_comparison_1.png",
+    "bytes": 237283,
+    "sha256": "769035107ff683db9d0a256b7cfcf27e20ae30da59b795a4ecf647749506dd38"
+  },
+  {
+    "path": "figures/india/learned_baselines/learned_baseline_comparison.png",
+    "bytes": 155012,
+    "sha256": "96e63970e9f3f586e4bbf483edfb58cc2346903b5d1f8490cf24f43be0411d97"
+  },
+  {
+    "path": "indian_learned_baselines.R",
+    "bytes": 19902,
+    "sha256": "9b02d3c68a7e74604ac48b7328a06c37faf5f6fc245aa73b97a15371103cf098"
+  },
+  {
+    "path": "INDIAN_RESULTS.md",
+    "bytes": 5333,
+    "sha256": "6916f772e82ae008930a00f0492ec00f000286f66e48963fb13ea1b42721f1a5"
+  },
+  {
+    "path": "results/india/learned_baselines/all_models.csv",
+    "bytes": 1934,
+    "sha256": "eda94a01c70fc9ef171409b4229adb7f85e33f5ac325a4bd9b57060a141c94bc"
+  },
+  {
+    "path": "results/india/learned_baselines/all_models_by_horizon.csv",
+    "bytes": 68646,
+    "sha256": "01ccc22227c7c19e82ecaa517332ffc356299dff36ea2b8a79226d78056a53b3"
+  },
+  {
+    "path": "results/india/learned_baselines/all_models_per_variable.csv",
+    "bytes": 32478,
+    "sha256": "655203eff9e3e6ebe01739d3051c6835b7013ab1d5885e104dff4838aa48dfaf"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F24_seed0_DLinear_complete.rds",
+    "bytes": 10827,
+    "sha256": "52b057d7a51c448142149a45f2796b3a3ab249612282c2aada1cc207c8fc73e7"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F24_seed0_iTransformer_complete.rds",
+    "bytes": 10805,
+    "sha256": "2e74e5792266d54999e6b2c490865c65b35105cf1e0b884e79d3ce764fa3720f"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F96_seed0_DLinear_complete.rds",
+    "bytes": 23459,
+    "sha256": "51abd340c2fc96b911083d8b6754a0c1be2d2e5b6db90acec6a485ee92eaa717"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_air_multivariate_F96_seed0_iTransformer_complete.rds",
+    "bytes": 23417,
+    "sha256": "390e39320427bab4562d14fb06558d4d29039321b68aa3a609e3abb052aa540f"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_DLinear_complete.rds",
+    "bytes": 10297,
+    "sha256": "c0f17dbe19f75b29cbbce035655d7585208e3f4bf72df8bd6ed40aed41ca650c"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F30_seed0_iTransformer_complete.rds",
+    "bytes": 10248,
+    "sha256": "1626d5f561952a6fc62d56f1a155aa7a09fcfc35830f83198a0559a1d15a8e71"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_DLinear_complete.rds",
+    "bytes": 6493,
+    "sha256": "90d4b2c0f85ce10eb5f7dea85c055f5ea79e3d9ed73447d0a60f1a9bcb52e5f1"
+  },
+  {
+    "path": "results/india/learned_baselines/Delhi_climate_multivariate_F7_seed0_iTransformer_complete.rds",
+    "bytes": 6411,
+    "sha256": "7cb9361a3dd4103a8e06bb38c46a1e6ba88d8f2aab2a6eb4bba4fa3aa43bd282"
+  },
+  {
+    "path": "results/india/learned_baselines/port_checks/official_parity_report.json",
+    "bytes": 469,
+    "sha256": "dbf95e59f8bd0e314b926a235201e05033f7f82cbc99c5ae6ece5833e4d46239"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F24_seed0_complete.rds",
+    "bytes": 10818,
+    "sha256": "528f5883e2dbd71afb2e1c680b80d348085910dd24ee79a478de8391e7bd39be"
+  },
+  {
+    "path": "results/india/timekan/Delhi_air_multivariate_F96_seed0_complete.rds",
+    "bytes": 23435,
+    "sha256": "046482ecff602a2fdb1db9ca0baaa4ea5ee8f100c28fa56aac9277573177f932"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F30_seed0_complete.rds",
+    "bytes": 10286,
+    "sha256": "598a519e46bd7068ad7c19b162d11916b55f8a68fc3c2ba7462bdc2687e80d3f"
+  },
+  {
+    "path": "results/india/timekan/Delhi_climate_multivariate_F7_seed0_complete.rds",
+    "bytes": 6489,
+    "sha256": "bfbb3b929330775143181ec1c6ba60c239e40553d4acee04d5a2cdf6a0614d46"
+  },
+  {
+    "path": "results/india/timekan/multivariate_summary.csv",
+    "bytes": 1242,
+    "sha256": "8fdadf73997212a5a9fe944994cf5aaa47c2fe06c1e15fc855efdfa7739aa067"
+  },
+  {
+    "path": "run_india_multivariate.R",
+    "bytes": 26516,
+    "sha256": "eddd3c099310144d0253951a3a54f52e8eedb2556f22567b72649739955d3116"
+  },
+  {
+    "path": "tests/india/check_baseline_ports.py",
+    "bytes": 4332,
+    "sha256": "e80ead1785fe81bc10b1594688353281fd2b14f1b3fc1d75e15dbb79f982a6db"
+  },
+  {
+    "path": "third_party/india_baselines/baseline_official_sources.json",
+    "bytes": 30920,
+    "sha256": "3f325f38f1af5ebf3d3cf404caa8b9d7c9d1e22ca3d3035c4b1312874056cab8"
+  },
+  {
+    "path": "third_party/india_baselines/baseline_reference_manifest.json",
+    "bytes": 1184,
+    "sha256": "e17a4c29c8d029ef6de66a89b747b7a50e68b9edb9de171d10ad1f2882d8b52c"
+  },
+  {
+    "path": "third_party/india_baselines/LICENSE_DLinear.txt",
+    "bytes": 11400,
+    "sha256": "7d0d8193e78eef828028dd99e7e0104fe4e858be03f94b90d84b20e2d0416708"
+  },
+  {
+    "path": "third_party/india_baselines/LICENSE_iTransformer.txt",
+    "bytes": 1084,
+    "sha256": "29d2a4c09fa577780522219dc248466977f77cd420354c5e9a0e86550be2b849"
+  }
+]

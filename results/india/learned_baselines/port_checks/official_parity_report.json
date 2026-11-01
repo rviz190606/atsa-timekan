@@ -1,0 +1,22 @@
+[
+  {
+    "model": "DLinear",
+    "tensor": "output",
+    "max_absolute_difference": 4.6629367034256575e-15
+  },
+  {
+    "model": "DLinear",
+    "tensor": "input_gradient",
+    "max_absolute_difference": 4.996003610813204e-16
+  },
+  {
+    "model": "iTransformer",
+    "tensor": "output",
+    "max_absolute_difference": 4.6629367034256575e-15
+  },
+  {
+    "model": "iTransformer",
+    "tensor": "input_gradient",
+    "max_absolute_difference": 4.85722573273506e-17
+  }
+]

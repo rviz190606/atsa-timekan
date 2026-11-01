@@ -1,0 +1,8 @@
+data: ETTh2.csv | split: etth | 7 variates | seq_len 96 -> pred_len 96 | device: cuda
+TimeKAN parameters: 12,881
+epoch  1 | train loss 0.2699 | val MSE 0.2156 | 5.7s
+epoch  2 | train loss 0.0758 | val MSE 0.2191 | 4.7s
+epoch  3 | train loss 8.7933 | val MSE 0.2621 | 4.2s
+epoch  4 | train loss 0.1185 | val MSE 0.2253 | 5.0s
+early stopping
+test MSE 0.2978 | test MAE 0.3440

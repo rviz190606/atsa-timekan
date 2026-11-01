@@ -19,3 +19,27 @@ data/
 .vscode/
 .idea/
 .DS_Store
+
+# Experiment progress log
+run.log
+run_order.log
+
+# Keep experiment results (data CSVs above stay ignored)
+!results/*.csv
+run_basis.log
+
+# Published Indian experiment tables and compact metric/configuration records.
+# Dataset CSVs and neural model weights remain ignored elsewhere.
+!results/india/**/all_models.csv
+!results/india/**/all_models_per_variable.csv
+!results/india/**/all_models_by_horizon.csv
+!results/india/**/multivariate_summary.csv
+!results/india/**/*_complete.rds
+
+# Keep only the curated Indian comparison and forecast figures in Git.
+figures/india/**/*.png
+!figures/india/learned_baselines/Delhi_air_multivariate_F24_forecast_comparison_1.png
+!figures/india/learned_baselines/Delhi_air_multivariate_F96_forecast_comparison_1.png
+!figures/india/learned_baselines/Delhi_climate_multivariate_F30_forecast_comparison_1.png
+!figures/india/learned_baselines/Delhi_climate_multivariate_F7_forecast_comparison_1.png
+!figures/india/learned_baselines/learned_baseline_comparison.png
