@@ -636,7 +636,7 @@ write_run_outputs <- function(res, out_dir) {
 # 4. Plots (base R graphics; no extra packages needed)
 # =============================================================================
 
-VARIANT_ORDER <- c("naive", "snaive", "linear", "base", "ab", "reg", "hi", "ab+reg", "hi+reg", "pca", "ab+reg+pca")
+VARIANT_ORDER <- c("naive", "snaive", "linear", "base", "ab", "convex", "reg", "hi", "ab+reg", "hi+reg", "pca", "ab+reg+pca")
 order_variants <- function(vs) {
   vs <- unique(vs); rk <- match(vs, VARIANT_ORDER)
   rk[is.na(rk)] <- 100 + seq_len(sum(is.na(rk)))
@@ -644,8 +644,8 @@ order_variants <- function(vs) {
 }
 variant_colors <- function(vs) {
   pal <- c(naive = "#9ecae1", snaive = "#bdbdbd", linear = "#636363", base = "#1f77b4", ab = "#2ca02c",
-           reg = "#ff7f0e", hi = "#8c564b", `ab+reg` = "#d62728", `hi+reg` = "#e377c2", pca = "#9467bd",
-           `ab+reg+pca` = "#17becf")
+           convex = "#17becf", reg = "#ff7f0e", hi = "#8c564b", `ab+reg` = "#d62728", `hi+reg` = "#e377c2",
+           pca = "#9467bd", `ab+reg+pca` = "#8c564b")
   out <- setNames(rep(NA_character_, length(vs)), vs)
   known <- vs %in% names(pal)
   out[known] <- unname(pal[vs[known]])
